@@ -101,7 +101,7 @@ impl NavigationController {
     /// Set maximum history size
     pub fn set_max_history_size(&mut self, max_size: usize) {
         self.max_history_size = max_size;
-        
+
         // Trim history if it exceeds new max size
         while self.history.len() > self.max_history_size {
             if self.current_index > 0 {
@@ -133,13 +133,13 @@ impl NavigationController {
         let mut result = Vec::new();
         let start = self.current_index.saturating_sub(before);
         let end = (self.current_index + after + 1).min(self.history.len());
-        
+
         for i in start..end {
             if let Some(url) = self.history.get(i) {
                 result.push((i, url));
             }
         }
-        
+
         result
     }
 }
@@ -166,14 +166,17 @@ mod tests {
     #[test]
     fn test_navigation_basic() {
         let mut nav = NavigationController::new();
-        
+
         nav.push_entry("https://example.com".to_string());
         assert_eq!(nav.get_history_size(), 1);
         assert_eq!(nav.get_current_index(), 0);
         assert!(!nav.can_go_back());
         assert!(!nav.can_go_forward());
-        assert_eq!(nav.get_current_url(), Some(&"https://example.com".to_string()));
-        
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://example.com".to_string())
+        );
+
         nav.push_entry("https://google.com".to_string());
         assert_eq!(nav.get_history_size(), 2);
         assert_eq!(nav.get_current_index(), 1);
@@ -184,31 +187,43 @@ mod tests {
     #[test]
     fn test_navigation_back_forward() {
         let mut nav = NavigationController::new();
-        
+
         nav.push_entry("https://example.com".to_string());
         nav.push_entry("https://google.com".to_string());
         nav.push_entry("https://github.com".to_string());
-        
-        assert_eq!(nav.get_current_url(), Some(&"https://github.com".to_string()));
-        
+
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://github.com".to_string())
+        );
+
         // Go back
         let url = nav.go_back().unwrap();
         assert_eq!(url, "https://google.com");
-        assert_eq!(nav.get_current_url(), Some(&"https://google.com".to_string()));
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://google.com".to_string())
+        );
         assert!(nav.can_go_back());
         assert!(nav.can_go_forward());
-        
+
         // Go back again
         let url = nav.go_back().unwrap();
         assert_eq!(url, "https://example.com");
-        assert_eq!(nav.get_current_url(), Some(&"https://example.com".to_string()));
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://example.com".to_string())
+        );
         assert!(!nav.can_go_back());
         assert!(nav.can_go_forward());
-        
+
         // Go forward
         let url = nav.go_forward().unwrap();
         assert_eq!(url, "https://google.com");
-        assert_eq!(nav.get_current_url(), Some(&"https://google.com".to_string()));
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://google.com".to_string())
+        );
         assert!(nav.can_go_back());
         assert!(nav.can_go_forward());
     }
@@ -216,18 +231,21 @@ mod tests {
     #[test]
     fn test_navigation_history_trimming() {
         let mut nav = NavigationController::new();
-        
+
         // Add entries
         nav.push_entry("https://example.com".to_string());
         nav.push_entry("https://google.com".to_string());
         nav.push_entry("https://github.com".to_string());
-        
+
         // Go back and add new entry (should trim forward history)
         nav.go_back().unwrap();
         nav.push_entry("https://stackoverflow.com".to_string());
-        
+
         assert_eq!(nav.get_history_size(), 3);
-        assert_eq!(nav.get_current_url(), Some(&"https://stackoverflow.com".to_string()));
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://stackoverflow.com".to_string())
+        );
         assert!(nav.can_go_back());
         assert!(!nav.can_go_forward());
     }
@@ -235,25 +253,28 @@ mod tests {
     #[test]
     fn test_navigation_max_size() {
         let mut nav = NavigationController::with_max_history_size(3);
-        
+
         nav.push_entry("https://example.com".to_string());
         nav.push_entry("https://google.com".to_string());
         nav.push_entry("https://github.com".to_string());
         nav.push_entry("https://stackoverflow.com".to_string());
-        
+
         assert_eq!(nav.get_history_size(), 3);
-        assert_eq!(nav.get_current_url(), Some(&"https://stackoverflow.com".to_string()));
+        assert_eq!(
+            nav.get_current_url(),
+            Some(&"https://stackoverflow.com".to_string())
+        );
     }
 
     #[test]
     fn test_navigation_clear() {
         let mut nav = NavigationController::new();
-        
+
         nav.push_entry("https://example.com".to_string());
         nav.push_entry("https://google.com".to_string());
-        
+
         nav.clear_history();
-        
+
         assert_eq!(nav.get_history_size(), 0);
         assert_eq!(nav.get_current_index(), 0);
         assert!(!nav.can_go_back());
@@ -263,15 +284,15 @@ mod tests {
     #[test]
     fn test_navigation_window() {
         let mut nav = NavigationController::new();
-        
+
         nav.push_entry("https://example.com".to_string());
         nav.push_entry("https://google.com".to_string());
         nav.push_entry("https://github.com".to_string());
         nav.push_entry("https://stackoverflow.com".to_string());
-        
+
         // Go to middle of history
         nav.go_back().unwrap();
-        
+
         let window = nav.get_history_window(1, 1);
         assert_eq!(window.len(), 3);
         assert_eq!(window[0].0, 1);

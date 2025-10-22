@@ -1,19 +1,19 @@
+pub mod cache;
 pub mod client;
+pub mod cookies;
+pub mod error;
+pub mod headers;
 pub mod request;
 pub mod response;
-pub mod headers;
-pub mod cookies;
-pub mod cache;
-pub mod error;
 pub mod utils;
 
-pub use client::HttpClient;
-pub use request::{HttpRequest, HttpMethod};
-pub use response::HttpResponse;
-pub use headers::HttpHeaders;
-pub use cookies::CookieJar;
 pub use cache::HttpCache;
+pub use client::HttpClient;
+pub use cookies::CookieJar;
 pub use error::{HttpError, HttpResult};
+pub use headers::HttpHeaders;
+pub use request::{HttpMethod, HttpRequest};
+pub use response::HttpResponse;
 
 #[cfg(test)]
 mod tests {
@@ -29,7 +29,8 @@ mod tests {
     #[tokio::test]
     async fn test_http_post() {
         let client = HttpClient::new();
-        let response = client.post("https://httpbin.org/post")
+        let response = client
+            .post("https://httpbin.org/post")
             .json(&serde_json::json!({"key": "value"}))
             .send()
             .await
@@ -40,7 +41,9 @@ mod tests {
     #[test]
     fn test_cookie_parsing() {
         let cookie_jar = CookieJar::new();
-        cookie_jar.parse_set_cookie("session=abc123; Path=/; HttpOnly").unwrap();
+        cookie_jar
+            .parse_set_cookie("session=abc123; Path=/; HttpOnly")
+            .unwrap();
         assert!(cookie_jar.get("session").is_some());
     }
 
@@ -49,7 +52,7 @@ mod tests {
         let headers = HttpHeaders::new();
         headers.set("Cache-Control", "max-age=3600");
         headers.set("ETag", "\"abc123\"");
-        
+
         assert_eq!(headers.get("Cache-Control"), Some("max-age=3600"));
         assert_eq!(headers.get("ETag"), Some("\"abc123\""));
     }

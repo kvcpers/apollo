@@ -1,18 +1,18 @@
-pub mod engine;
 pub mod document;
-pub mod window;
-pub mod tab;
-pub mod navigation;
-pub mod events;
+pub mod engine;
 pub mod error;
+pub mod events;
+pub mod navigation;
+pub mod tab;
+pub mod window;
 
-pub use engine::BrowserEngine;
 pub use document::Document;
-pub use window::Window;
-pub use tab::Tab;
-pub use navigation::NavigationController;
-pub use events::{EventTarget, EventListener};
+pub use engine::BrowserEngine;
 pub use error::{BrowserError, BrowserResult};
+pub use events::{EventListener, EventTarget};
+pub use navigation::NavigationController;
+pub use tab::Tab;
+pub use window::Window;
 
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -35,18 +35,18 @@ impl Browser {
 
     pub async fn initialize(&mut self) -> BrowserResult<()> {
         tracing::info!("Initializing browser engine");
-        
+
         // Initialize the browser engine
         let mut engine = self.engine.write().await;
         engine.initialize().await?;
-        
+
         // Create the main window
         let main_window = Arc::new(RwLock::new(Window::new()));
         self.windows.push(main_window);
-        
+
         self.is_running = true;
         tracing::info!("Browser initialized successfully");
-        
+
         Ok(())
     }
 
@@ -56,12 +56,12 @@ impl Browser {
         }
 
         tracing::info!("Starting browser main loop");
-        
+
         // Main event loop
         loop {
             // Process events, update UI, handle input, etc.
             tokio::time::sleep(tokio::time::Duration::from_millis(16)).await; // ~60 FPS
-            
+
             // Check if we should exit
             if !self.is_running {
                 break;
@@ -121,7 +121,7 @@ mod tests {
     async fn test_browser_initialization() {
         let mut browser = Browser::new();
         browser.initialize().await.unwrap();
-        
+
         assert!(browser.is_running);
         assert_eq!(browser.get_window_count(), 1);
     }
@@ -130,7 +130,7 @@ mod tests {
     async fn test_window_creation() {
         let mut browser = Browser::new();
         browser.initialize().await.unwrap();
-        
+
         let window = browser.create_window().await.unwrap();
         assert_eq!(browser.get_window_count(), 2);
     }

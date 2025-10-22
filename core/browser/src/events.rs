@@ -25,25 +25,25 @@ pub enum EventType {
     Unload,
     Resize,
     Scroll,
-    
+
     // Navigation Events
     NavigationStart,
     NavigationComplete,
     NavigationError,
-    
+
     // Tab Events
     TabCreated,
     TabClosed,
     TabActivated,
     TabUpdated,
-    
+
     // Window Events
     WindowCreated,
     WindowClosed,
     WindowActivated,
     WindowResized,
     WindowMoved,
-    
+
     // Custom Events
     Custom(String),
 }
@@ -191,7 +191,10 @@ impl EventTarget {
 
     /// Add an event listener
     pub fn add_event_listener(&mut self, event_type: EventType, listener: EventListener) {
-        self.listeners.entry(event_type).or_insert_with(Vec::new).push(listener);
+        self.listeners
+            .entry(event_type)
+            .or_insert_with(Vec::new)
+            .push(listener);
     }
 
     /// Remove an event listener
@@ -209,7 +212,7 @@ impl EventTarget {
         if let Some(listeners) = self.listeners.get(&event.event_type) {
             for listener in listeners {
                 listener(&event);
-                
+
                 if event.propagation_stopped {
                     return;
                 }
@@ -227,12 +230,16 @@ impl EventTarget {
 
     /// Check if has listeners for event type
     pub fn has_listeners(&self, event_type: &EventType) -> bool {
-        self.listeners.get(event_type).map_or(false, |listeners| !listeners.is_empty())
+        self.listeners
+            .get(event_type)
+            .map_or(false, |listeners| !listeners.is_empty())
     }
 
     /// Get listener count for event type
     pub fn get_listener_count(&self, event_type: &EventType) -> usize {
-        self.listeners.get(event_type).map_or(0, |listeners| listeners.len())
+        self.listeners
+            .get(event_type)
+            .map_or(0, |listeners| listeners.len())
     }
 
     /// Set parent event target
@@ -321,8 +328,11 @@ mod tests {
     fn test_event_type_conversion() {
         assert_eq!(EventType::from_string("click"), EventType::Click);
         assert_eq!(EventType::from_string("dblclick"), EventType::DoubleClick);
-        assert_eq!(EventType::from_string("custom_event"), EventType::Custom("custom_event".to_string()));
-        
+        assert_eq!(
+            EventType::from_string("custom_event"),
+            EventType::Custom("custom_event".to_string())
+        );
+
         assert_eq!(EventType::Click.to_string(), "click");
         assert_eq!(EventType::DoubleClick.to_string(), "dblclick");
         assert_eq!(EventType::Custom("test".to_string()).to_string(), "test");
@@ -341,23 +351,29 @@ mod tests {
         assert!(event.cancelable);
         assert!(!event.default_prevented);
         assert!(!event.propagation_stopped);
-        assert_eq!(event.data.get("x"), Some(&serde_json::Value::Number(100.into())));
-        assert_eq!(event.data.get("y"), Some(&serde_json::Value::Number(200.into())));
+        assert_eq!(
+            event.data.get("x"),
+            Some(&serde_json::Value::Number(100.into()))
+        );
+        assert_eq!(
+            event.data.get("y"),
+            Some(&serde_json::Value::Number(200.into()))
+        );
     }
 
     #[test]
     fn test_event_target_listeners() {
         let mut target = EventTarget::new();
-        
+
         let counter = Arc::new(AtomicU32::new(0));
         let counter_clone = counter.clone();
-        
+
         let listener = Box::new(move |_event: &EventData| {
             counter_clone.fetch_add(1, Ordering::SeqCst);
         });
-        
+
         target.add_event_listener(EventType::Click, listener);
-        
+
         assert!(target.has_listeners(&EventType::Click));
         assert_eq!(target.get_listener_count(&EventType::Click), 1);
         assert!(!target.has_listeners(&EventType::KeyDown));
@@ -367,18 +383,18 @@ mod tests {
     #[test]
     fn test_event_dispatcher() {
         let mut dispatcher = EventDispatcher::new();
-        
+
         let target1 = Arc::new(RwLock::new(EventTarget::new()));
         let target2 = Arc::new(RwLock::new(EventTarget::new()));
-        
+
         dispatcher.register_target("target1".to_string(), target1);
         dispatcher.register_target("target2".to_string(), target2);
-        
+
         assert_eq!(dispatcher.get_target_count(), 2);
         assert!(dispatcher.get_target("target1").is_some());
         assert!(dispatcher.get_target("target2").is_some());
         assert!(dispatcher.get_target("target3").is_none());
-        
+
         dispatcher.unregister_target("target1");
         assert_eq!(dispatcher.get_target_count(), 1);
         assert!(dispatcher.get_target("target1").is_none());

@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
-use crate::selector::SelectorList;
 use crate::properties::{PropertyDeclaration, PropertyMap};
+use crate::selector::SelectorList;
 use crate::specificity::Specificity;
+use serde::{Deserialize, Serialize};
 
 /// CSS stylesheet
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -73,59 +73,74 @@ impl Stylesheet {
     }
 
     /// Get all rules that match the given element
-    pub fn get_matching_rules(&self, element: &html_parser::Element, context: &crate::selector::SelectorMatchContext) -> Vec<&Rule> {
+    pub fn get_matching_rules(
+        &self,
+        element: &html_parser::Element,
+        context: &crate::selector::SelectorMatchContext,
+    ) -> Vec<&Rule> {
         let mut matching_rules = Vec::new();
-        
+
         for rule in &self.rules {
             if rule.selectors.matches_element(element, context) {
                 matching_rules.push(rule);
             }
         }
-        
+
         matching_rules
     }
 
     /// Get all declarations for a specific property
-    pub fn get_declarations_for_property(&self, property: &crate::properties::Property) -> Vec<&PropertyDeclaration> {
+    pub fn get_declarations_for_property(
+        &self,
+        property: &crate::properties::Property,
+    ) -> Vec<&PropertyDeclaration> {
         let mut declarations = Vec::new();
-        
+
         for rule in &self.rules {
             for declaration in &rule.declarations {
-                if std::mem::discriminant(&declaration.property) == std::mem::discriminant(property) {
+                if std::mem::discriminant(&declaration.property) == std::mem::discriminant(property)
+                {
                     declarations.push(declaration);
                 }
             }
         }
-        
+
         declarations
     }
 
     /// Compute cascade for a specific property on an element
-    pub fn compute_cascade(&self, element: &html_parser::Element, property: &crate::properties::Property, context: &crate::selector::SelectorMatchContext) -> Option<PropertyDeclaration> {
+    pub fn compute_cascade(
+        &self,
+        element: &html_parser::Element,
+        property: &crate::properties::Property,
+        context: &crate::selector::SelectorMatchContext,
+    ) -> Option<PropertyDeclaration> {
         let mut candidates = Vec::new();
-        
+
         // Find all matching rules
         for rule in &self.rules {
             if rule.selectors.matches_element(element, context) {
                 for declaration in &rule.declarations {
-                    if std::mem::discriminant(&declaration.property) == std::mem::discriminant(property) {
+                    if std::mem::discriminant(&declaration.property)
+                        == std::mem::discriminant(property)
+                    {
                         candidates.push(declaration);
                     }
                 }
             }
         }
-        
+
         if candidates.is_empty() {
             return None;
         }
-        
+
         // Sort by specificity and source order
         candidates.sort_by(|a, b| {
             // In a real implementation, this would use the cascade context
             // For now, just return the first match
             std::cmp::Ordering::Equal
         });
-        
+
         Some(candidates[0].clone())
     }
 }
@@ -139,7 +154,9 @@ impl Default for Stylesheet {
 impl Rule {
     pub fn new(selectors: SelectorList, declarations: Vec<PropertyDeclaration>) -> Self {
         // Calculate specificity for the rule (highest specificity among selectors)
-        let specificity = selectors.selectors.iter()
+        let specificity = selectors
+            .selectors
+            .iter()
             .map(|s| s.specificity)
             .max()
             .unwrap_or_default();
@@ -152,31 +169,45 @@ impl Rule {
     }
 
     /// Check if this rule matches the given element
-    pub fn matches_element(&self, element: &html_parser::Element, context: &crate::selector::SelectorMatchContext) -> bool {
+    pub fn matches_element(
+        &self,
+        element: &html_parser::Element,
+        context: &crate::selector::SelectorMatchContext,
+    ) -> bool {
         self.selectors.matches_element(element, context)
     }
 
     /// Get all declarations for a specific property
-    pub fn get_declarations_for_property(&self, property: &crate::properties::Property) -> Vec<&PropertyDeclaration> {
-        self.declarations.iter()
-            .filter(|decl| std::mem::discriminant(&decl.property) == std::mem::discriminant(property))
+    pub fn get_declarations_for_property(
+        &self,
+        property: &crate::properties::Property,
+    ) -> Vec<&PropertyDeclaration> {
+        self.declarations
+            .iter()
+            .filter(|decl| {
+                std::mem::discriminant(&decl.property) == std::mem::discriminant(property)
+            })
             .collect()
     }
 
     /// Convert rule to property map
     pub fn to_property_map(&self) -> PropertyMap {
         let mut property_map = PropertyMap::new();
-        
+
         for declaration in &self.declarations {
             property_map.set_property(declaration.property.clone(), declaration.value.clone());
         }
-        
+
         property_map
     }
 }
 
 impl AtRule {
-    pub fn new(name: String, parameters: Vec<crate::tokenizer::CssToken>, body: Vec<crate::tokenizer::CssToken>) -> Self {
+    pub fn new(
+        name: String,
+        parameters: Vec<crate::tokenizer::CssToken>,
+        body: Vec<crate::tokenizer::CssToken>,
+    ) -> Self {
         Self {
             name,
             parameters,
@@ -281,10 +312,16 @@ impl MediaQuery {
     }
 
     /// Check if this media query matches the current media
-    pub fn matches(&self, media_type: &str, features: &std::collections::HashMap<String, String>) -> bool {
+    pub fn matches(
+        &self,
+        media_type: &str,
+        features: &std::collections::HashMap<String, String>,
+    ) -> bool {
         // Check media type
         if let Some(query_media_type) = &self.media_type {
-            if query_media_type.to_lowercase() != media_type.to_lowercase() && query_media_type != "all" {
+            if query_media_type.to_lowercase() != media_type.to_lowercase()
+                && query_media_type != "all"
+            {
                 return false;
             }
         }
@@ -342,15 +379,19 @@ impl CascadeLayer {
     }
 
     /// Get all rules that match the given element
-    pub fn get_matching_rules(&self, element: &html_parser::Element, context: &crate::selector::SelectorMatchContext) -> Vec<&Rule> {
+    pub fn get_matching_rules(
+        &self,
+        element: &html_parser::Element,
+        context: &crate::selector::SelectorMatchContext,
+    ) -> Vec<&Rule> {
         let mut matching_rules = Vec::new();
-        
+
         for rule in &self.rules {
             if rule.selectors.matches_element(element, context) {
                 matching_rules.push(rule);
             }
         }
-        
+
         matching_rules
     }
 }
@@ -503,14 +544,14 @@ mod tests {
         let selectors = SelectorList::new();
         let declarations = Vec::new();
         let rule = Rule::new(selectors, declarations);
-        
+
         assert_eq!(rule.declarations.len(), 0);
     }
 
     #[test]
     fn test_at_rule_creation() {
         let at_rule = AtRule::new("media".to_string(), Vec::new(), Vec::new());
-        
+
         assert_eq!(at_rule.name, "media");
         assert!(at_rule.is_media_rule());
         assert!(!at_rule.is_import_rule());
@@ -519,7 +560,7 @@ mod tests {
     #[test]
     fn test_media_query_matching() {
         let mut media_query = MediaQuery::with_media_type("screen".to_string());
-        
+
         assert!(media_query.matches("screen", &std::collections::HashMap::new()));
         assert!(!media_query.matches("print", &std::collections::HashMap::new()));
     }
@@ -527,7 +568,7 @@ mod tests {
     #[test]
     fn test_container_query_matching() {
         let container_query = ContainerQuery::new();
-        
+
         assert!(container_query.matches((800.0, 600.0), None));
     }
 }

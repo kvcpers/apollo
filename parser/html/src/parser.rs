@@ -1,13 +1,13 @@
-use std::collections::HashMap;
-use crate::tokenizer::{HtmlTokenizer, TokenType};
-use crate::dom::{DomTree, Node, Element, Document};
+use crate::dom::{Document, DomTree, Element, Node};
 use crate::error::{HtmlError, HtmlResult};
+use crate::tokenizer::{HtmlTokenizer, TokenType};
+use std::collections::HashMap;
 
 /// HTML parser that builds DOM tree from tokens
 pub struct HtmlParser {
     tokenizer: HtmlTokenizer,
     dom_tree: DomTree,
-    stack: Vec<usize>, // Stack of open elements
+    stack: Vec<usize>,                  // Stack of open elements
     foster_parenting_stack: Vec<usize>, // For table elements
     head_pointer: Option<usize>,
     form_pointer: Option<usize>,
@@ -42,11 +42,11 @@ impl HtmlParser {
     pub fn parse_fragment(&mut self, html: &str, context: &str) -> HtmlResult<Vec<usize>> {
         // Create a minimal document structure for fragment parsing
         let mut tokens = self.tokenizer.tokenize()?;
-        
+
         // Insert context element tokens if needed
         let context_tokens = self.create_context_tokens(context);
         tokens.splice(0..0, context_tokens);
-        
+
         self.parse_tokens(tokens)?;
 
         // Return the nodes that were added to the context element
@@ -62,7 +62,7 @@ impl HtmlParser {
     fn create_context_tokens(&self, context: &str) -> Vec<crate::tokenizer::Token> {
         // Simplified - create opening and closing tags for context
         let mut tokens = Vec::new();
-        
+
         tokens.push(crate::tokenizer::Token {
             token_type: TokenType::StartTag {
                 name: context.to_string(),
@@ -99,7 +99,11 @@ impl HtmlParser {
 
     fn process_token(&mut self, token: crate::tokenizer::Token) -> HtmlResult<()> {
         match token.token_type {
-            TokenType::StartTag { name, attributes, self_closing } => {
+            TokenType::StartTag {
+                name,
+                attributes,
+                self_closing,
+            } => {
                 self.process_start_tag(name, attributes, self_closing)?;
             }
             TokenType::EndTag(name) => {
@@ -125,10 +129,15 @@ impl HtmlParser {
         Ok(())
     }
 
-    fn process_start_tag(&mut self, name: String, attributes: Vec<(String, String)>, self_closing: bool) -> HtmlResult<()> {
+    fn process_start_tag(
+        &mut self,
+        name: String,
+        attributes: Vec<(String, String)>,
+        self_closing: bool,
+    ) -> HtmlResult<()> {
         let element = Element::new(name.clone());
         let mut node = Node::element(name.clone());
-        
+
         // Set attributes
         if let Some(element_ref) = node.as_element_mut() {
             for (attr_name, attr_value) in attributes {
@@ -245,7 +254,7 @@ impl HtmlParser {
     fn close_remaining_tags(&mut self) -> HtmlResult<()> {
         // Close all remaining open tags (except html, head, body)
         let mut to_close = Vec::new();
-        
+
         for &node_id in &self.stack {
             if let Some(node) = self.dom_tree.get_node(node_id) {
                 if let Some(element) = node.as_element() {

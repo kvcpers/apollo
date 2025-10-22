@@ -64,8 +64,7 @@ impl HttpResponse {
     }
 
     pub fn content_length(&self) -> Option<usize> {
-        self.header("Content-Length")
-            .and_then(|s| s.parse().ok())
+        self.header("Content-Length").and_then(|s| s.parse().ok())
     }
 
     pub fn location(&self) -> Option<&str> {

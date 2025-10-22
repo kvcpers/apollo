@@ -1,4 +1,4 @@
-use crate::dom::{DomTree, Node, Element};
+use crate::dom::{DomTree, Element, Node};
 use crate::error::HtmlResult;
 
 /// HTML entity decoder
@@ -27,7 +27,7 @@ impl EntityDecoder {
 
     fn decode_entity(chars: &mut std::iter::Peekable<std::str::Chars>) -> Option<String> {
         let mut entity = String::new();
-        
+
         // Collect characters until we find ';' or invalid character
         while let Some(&ch) = chars.peek() {
             if ch == ';' {
@@ -163,7 +163,11 @@ impl HtmlValidator {
         Ok(())
     }
 
-    fn validate_element_nesting(dom_tree: &DomTree, node_id: usize, element: &Element) -> HtmlResult<()> {
+    fn validate_element_nesting(
+        dom_tree: &DomTree,
+        node_id: usize,
+        element: &Element,
+    ) -> HtmlResult<()> {
         let tag_name = element.tag_name.to_lowercase();
 
         // Check parent constraints
@@ -215,9 +219,12 @@ impl HtmlValidator {
                             }
                         }
                         "tr" => {
-                            if !matches!(parent_tag.as_str(), "table" | "thead" | "tbody" | "tfoot") {
+                            if !matches!(parent_tag.as_str(), "table" | "thead" | "tbody" | "tfoot")
+                            {
                                 return Err(crate::error::HtmlError::ParseError {
-                                    message: "tr element must be child of table, thead, tbody, or tfoot".to_string(),
+                                    message:
+                                        "tr element must be child of table, thead, tbody, or tfoot"
+                                            .to_string(),
                                     line: 0,
                                     column: 0,
                                     context: "validation".to_string(),
@@ -287,12 +294,12 @@ impl HtmlFormatter {
         match &node.node_type {
             crate::dom::NodeType::Element(element) => {
                 let mut result = String::new();
-                
+
                 // Opening tag
                 result.push_str(&indent);
                 result.push('<');
                 result.push_str(&element.tag_name);
-                
+
                 // Attributes
                 for (name, value) in &element.attributes {
                     result.push(' ');
@@ -301,14 +308,14 @@ impl HtmlFormatter {
                     result.push_str(&Self::escape_attribute_value(value));
                     result.push('"');
                 }
-                
+
                 if element.is_void || element.is_self_closing {
                     result.push_str(" />");
                     return result;
                 }
-                
+
                 result.push('>');
-                
+
                 // Children
                 if !node.children.is_empty() {
                     result.push('\n');
@@ -318,12 +325,12 @@ impl HtmlFormatter {
                     }
                     result.push_str(&indent);
                 }
-                
+
                 // Closing tag
                 result.push_str("</");
                 result.push_str(&element.tag_name);
                 result.push('>');
-                
+
                 result
             }
             crate::dom::NodeType::Text(text) => {
@@ -368,7 +375,8 @@ impl HtmlFormatter {
     }
 
     fn escape_attribute_value(value: &str) -> String {
-        value.chars()
+        value
+            .chars()
             .map(|c| match c {
                 '"' => "&quot;".to_string(),
                 '&' => "&amp;".to_string(),

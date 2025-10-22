@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HttpHeaders {
@@ -54,7 +54,10 @@ impl HttpHeaders {
     }
 
     pub fn to_vec(&self) -> Vec<(String, String)> {
-        self.headers.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+        self.headers
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
     }
 
     pub fn from_vec(headers: Vec<(String, String)>) -> Self {

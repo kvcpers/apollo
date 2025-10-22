@@ -14,7 +14,7 @@ pub enum Property {
     ZIndex,
     Float,
     Clear,
-    
+
     // Box model properties
     Width,
     Height,
@@ -63,7 +63,7 @@ pub enum Property {
     OutlineStyle,
     OutlineColor,
     OutlineOffset,
-    
+
     // Flexbox properties
     FlexDirection,
     FlexWrap,
@@ -77,7 +77,7 @@ pub enum Property {
     FlexShrink,
     FlexBasis,
     Order,
-    
+
     // Grid properties
     Grid,
     GridTemplate,
@@ -95,7 +95,7 @@ pub enum Property {
     GridRowStart,
     GridRowEnd,
     JustifySelf,
-    
+
     // Typography properties
     FontFamily,
     FontSize,
@@ -120,7 +120,7 @@ pub enum Property {
     WordBreak,
     WordWrap,
     OverflowWrap,
-    
+
     // Color properties
     Color,
     BackgroundColor,
@@ -132,7 +132,7 @@ pub enum Property {
     Background,
     BackgroundClip,
     BackgroundOrigin,
-    
+
     // Visual effects
     Opacity,
     Visibility,
@@ -145,7 +145,7 @@ pub enum Property {
     Filter,
     BackdropFilter,
     BoxShadow,
-    
+
     // Animation properties
     Transition,
     TransitionProperty,
@@ -161,7 +161,7 @@ pub enum Property {
     AnimationDirection,
     AnimationFillMode,
     AnimationPlayState,
-    
+
     // Print properties
     PageBreakBefore,
     PageBreakAfter,
@@ -171,10 +171,10 @@ pub enum Property {
     BreakInside,
     Orphans,
     Widows,
-    
+
     // Custom properties (CSS variables)
     Custom(String),
-    
+
     // Unknown property
     Unknown(String),
 }
@@ -191,7 +191,7 @@ impl Property {
             "z-index" => Property::ZIndex,
             "float" => Property::Float,
             "clear" => Property::Clear,
-            
+
             "width" => Property::Width,
             "height" => Property::Height,
             "min-width" => Property::MinWidth,
@@ -239,7 +239,7 @@ impl Property {
             "outline-style" => Property::OutlineStyle,
             "outline-color" => Property::OutlineColor,
             "outline-offset" => Property::OutlineOffset,
-            
+
             "flex-direction" => Property::FlexDirection,
             "flex-wrap" => Property::FlexWrap,
             "flex-flow" => Property::FlexFlow,
@@ -252,7 +252,7 @@ impl Property {
             "flex-shrink" => Property::FlexShrink,
             "flex-basis" => Property::FlexBasis,
             "order" => Property::Order,
-            
+
             "grid" => Property::Grid,
             "grid-template" => Property::GridTemplate,
             "grid-template-columns" => Property::GridTemplateColumns,
@@ -269,7 +269,7 @@ impl Property {
             "grid-row-start" => Property::GridRowStart,
             "grid-row-end" => Property::GridRowEnd,
             "justify-self" => Property::JustifySelf,
-            
+
             "font-family" => Property::FontFamily,
             "font-size" => Property::FontSize,
             "font-weight" => Property::FontWeight,
@@ -293,7 +293,7 @@ impl Property {
             "word-break" => Property::WordBreak,
             "word-wrap" => Property::WordWrap,
             "overflow-wrap" => Property::OverflowWrap,
-            
+
             "color" => Property::Color,
             "background-color" => Property::BackgroundColor,
             "background-image" => Property::BackgroundImage,
@@ -304,7 +304,7 @@ impl Property {
             "background" => Property::Background,
             "background-clip" => Property::BackgroundClip,
             "background-origin" => Property::BackgroundOrigin,
-            
+
             "opacity" => Property::Opacity,
             "visibility" => Property::Visibility,
             "transform" => Property::Transform,
@@ -316,7 +316,7 @@ impl Property {
             "filter" => Property::Filter,
             "backdrop-filter" => Property::BackdropFilter,
             "box-shadow" => Property::BoxShadow,
-            
+
             "transition" => Property::Transition,
             "transition-property" => Property::TransitionProperty,
             "transition-duration" => Property::TransitionDuration,
@@ -331,7 +331,7 @@ impl Property {
             "animation-direction" => Property::AnimationDirection,
             "animation-fill-mode" => Property::AnimationFillMode,
             "animation-play-state" => Property::AnimationPlayState,
-            
+
             "page-break-before" => Property::PageBreakBefore,
             "page-break-after" => Property::PageBreakAfter,
             "page-break-inside" => Property::PageBreakInside,
@@ -340,7 +340,7 @@ impl Property {
             "break-inside" => Property::BreakInside,
             "orphans" => Property::Orphans,
             "widows" => Property::Widows,
-            
+
             name if name.starts_with("--") => Property::Custom(name.to_string()),
             name => Property::Unknown(name.to_string()),
         }
@@ -357,7 +357,7 @@ impl Property {
             Property::ZIndex => "z-index".to_string(),
             Property::Float => "float".to_string(),
             Property::Clear => "clear".to_string(),
-            
+
             Property::Width => "width".to_string(),
             Property::Height => "height".to_string(),
             Property::MinWidth => "min-width".to_string(),
@@ -405,7 +405,7 @@ impl Property {
             Property::OutlineStyle => "outline-style".to_string(),
             Property::OutlineColor => "outline-color".to_string(),
             Property::OutlineOffset => "outline-offset".to_string(),
-            
+
             Property::FlexDirection => "flex-direction".to_string(),
             Property::FlexWrap => "flex-wrap".to_string(),
             Property::FlexFlow => "flex-flow".to_string(),
@@ -418,7 +418,7 @@ impl Property {
             Property::FlexShrink => "flex-shrink".to_string(),
             Property::FlexBasis => "flex-basis".to_string(),
             Property::Order => "order".to_string(),
-            
+
             Property::Grid => "grid".to_string(),
             Property::GridTemplate => "grid-template".to_string(),
             Property::GridTemplateColumns => "grid-template-columns".to_string(),
@@ -435,7 +435,7 @@ impl Property {
             Property::GridRowStart => "grid-row-start".to_string(),
             Property::GridRowEnd => "grid-row-end".to_string(),
             Property::JustifySelf => "justify-self".to_string(),
-            
+
             Property::FontFamily => "font-family".to_string(),
             Property::FontSize => "font-size".to_string(),
             Property::FontWeight => "font-weight".to_string(),
@@ -459,7 +459,7 @@ impl Property {
             Property::WordBreak => "word-break".to_string(),
             Property::WordWrap => "word-wrap".to_string(),
             Property::OverflowWrap => "overflow-wrap".to_string(),
-            
+
             Property::Color => "color".to_string(),
             Property::BackgroundColor => "background-color".to_string(),
             Property::BackgroundImage => "background-image".to_string(),
@@ -470,7 +470,7 @@ impl Property {
             Property::Background => "background".to_string(),
             Property::BackgroundClip => "background-clip".to_string(),
             Property::BackgroundOrigin => "background-origin".to_string(),
-            
+
             Property::Opacity => "opacity".to_string(),
             Property::Visibility => "visibility".to_string(),
             Property::Transform => "transform".to_string(),
@@ -482,7 +482,7 @@ impl Property {
             Property::Filter => "filter".to_string(),
             Property::BackdropFilter => "backdrop-filter".to_string(),
             Property::BoxShadow => "box-shadow".to_string(),
-            
+
             Property::Transition => "transition".to_string(),
             Property::TransitionProperty => "transition-property".to_string(),
             Property::TransitionDuration => "transition-duration".to_string(),
@@ -497,7 +497,7 @@ impl Property {
             Property::AnimationDirection => "animation-direction".to_string(),
             Property::AnimationFillMode => "animation-fill-mode".to_string(),
             Property::AnimationPlayState => "animation-play-state".to_string(),
-            
+
             Property::PageBreakBefore => "page-break-before".to_string(),
             Property::PageBreakAfter => "page-break-after".to_string(),
             Property::PageBreakInside => "page-break-inside".to_string(),
@@ -506,7 +506,7 @@ impl Property {
             Property::BreakInside => "break-inside".to_string(),
             Property::Orphans => "orphans".to_string(),
             Property::Widows => "widows".to_string(),
-            
+
             Property::Custom(name) => name.clone(),
             Property::Unknown(name) => name.clone(),
         }
@@ -524,24 +524,24 @@ pub enum PropertyValue {
     Initial,
     Inherit,
     Unset,
-    
+
     // Color values
     Color(Color),
-    
+
     // String values
     String(String),
     Identifier(String),
-    
+
     // Numeric values
     Number(f32),
     Integer(i32),
-    
+
     // Function values
     Function(String, Vec<PropertyValue>),
-    
+
     // List values
     List(Vec<PropertyValue>, ListSeparator),
-    
+
     // Complex values
     Display(DisplayValue),
     Position(PositionValue),
@@ -561,7 +561,7 @@ pub enum PropertyValue {
     Visibility(VisibilityValue),
     Opacity(OpacityValue),
     ZIndex(ZIndexValue),
-    
+
     // Flexbox values
     FlexDirection(FlexDirectionValue),
     FlexWrap(FlexWrapValue),
@@ -570,30 +570,30 @@ pub enum PropertyValue {
     AlignContent(AlignContentValue),
     AlignSelf(AlignSelfValue),
     FlexBasis(FlexBasisValue),
-    
+
     // Grid values
     GridTemplateColumns(GridTemplateColumnsValue),
     GridTemplateRows(GridTemplateRowsValue),
     GridArea(GridAreaValue),
     JustifySelf(JustifySelfValue),
-    
+
     // Background values
     BackgroundImage(BackgroundImageValue),
     BackgroundRepeat(BackgroundRepeatValue),
     BackgroundPosition(BackgroundPositionValue),
     BackgroundSize(BackgroundSizeValue),
     BackgroundAttachment(BackgroundAttachmentValue),
-    
+
     // Transform values
     Transform(TransformValue),
-    
+
     // Animation values
     Transition(TransitionValue),
     Animation(AnimationValue),
-    
+
     // Custom property value
     Custom(String),
-    
+
     // Unknown value
     Unknown(String),
 }
@@ -601,21 +601,21 @@ pub enum PropertyValue {
 /// Length units
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum LengthUnit {
-    Px,    // pixels
-    Em,    // relative to font size
-    Rem,   // relative to root font size
-    Ex,    // relative to x-height
-    Ch,    // relative to character width
-    Vw,    // viewport width
-    Vh,    // viewport height
-    Vmin,  // viewport minimum
-    Vmax,  // viewport maximum
-    Pt,    // points
-    Pc,    // picas
-    In,    // inches
-    Cm,    // centimeters
-    Mm,    // millimeters
-    Q,     // quarter-millimeters
+    Px,      // pixels
+    Em,      // relative to font size
+    Rem,     // relative to root font size
+    Ex,      // relative to x-height
+    Ch,      // relative to character width
+    Vw,      // viewport width
+    Vh,      // viewport height
+    Vmin,    // viewport minimum
+    Vmax,    // viewport maximum
+    Pt,      // points
+    Pc,      // picas
+    In,      // inches
+    Cm,      // centimeters
+    Mm,      // millimeters
+    Q,       // quarter-millimeters
     Percent, // percentage (handled separately)
 }
 
@@ -1316,10 +1316,19 @@ mod tests {
     #[test]
     fn test_property_parsing() {
         assert_eq!(Property::from_string("color"), Property::Color);
-        assert_eq!(Property::from_string("background-color"), Property::BackgroundColor);
+        assert_eq!(
+            Property::from_string("background-color"),
+            Property::BackgroundColor
+        );
         assert_eq!(Property::from_string("font-size"), Property::FontSize);
-        assert_eq!(Property::from_string("--custom-property"), Property::Custom("--custom-property".to_string()));
-        assert_eq!(Property::from_string("unknown-property"), Property::Unknown("unknown-property".to_string()));
+        assert_eq!(
+            Property::from_string("--custom-property"),
+            Property::Custom("--custom-property".to_string())
+        );
+        assert_eq!(
+            Property::from_string("unknown-property"),
+            Property::Unknown("unknown-property".to_string())
+        );
     }
 
     #[test]
@@ -1327,23 +1336,33 @@ mod tests {
         assert_eq!(Property::Color.to_string(), "color");
         assert_eq!(Property::BackgroundColor.to_string(), "background-color");
         assert_eq!(Property::FontSize.to_string(), "font-size");
-        assert_eq!(Property::Custom("--custom-property".to_string()).to_string(), "--custom-property");
+        assert_eq!(
+            Property::Custom("--custom-property".to_string()).to_string(),
+            "--custom-property"
+        );
     }
 
     #[test]
     fn test_property_map_operations() {
         let mut map = PropertyMap::new();
-        
-        map.set_property(Property::Color, PropertyValue::Color(Color::Named("red".to_string())));
-        map.set_property(Property::FontSize, PropertyValue::Length(16.0, LengthUnit::Px));
-        
+
+        map.set_property(
+            Property::Color,
+            PropertyValue::Color(Color::Named("red".to_string())),
+        );
+        map.set_property(
+            Property::FontSize,
+            PropertyValue::Length(16.0, LengthUnit::Px),
+        );
+
         assert!(map.has_property(&Property::Color));
         assert!(map.has_property(&Property::FontSize));
         assert!(!map.has_property(&Property::BackgroundColor));
-        
+
         assert_eq!(map.len(), 2);
-        
-        if let Some(PropertyValue::Color(Color::Named(color))) = map.get_property(&Property::Color) {
+
+        if let Some(PropertyValue::Color(Color::Named(color))) = map.get_property(&Property::Color)
+        {
             assert_eq!(color, "red");
         } else {
             panic!("Expected color property");
@@ -1353,13 +1372,19 @@ mod tests {
     #[test]
     fn test_property_map_merge() {
         let mut map1 = PropertyMap::new();
-        map1.set_property(Property::Color, PropertyValue::Color(Color::Named("red".to_string())));
-        
+        map1.set_property(
+            Property::Color,
+            PropertyValue::Color(Color::Named("red".to_string())),
+        );
+
         let mut map2 = PropertyMap::new();
-        map2.set_property(Property::FontSize, PropertyValue::Length(16.0, LengthUnit::Px));
-        
+        map2.set_property(
+            Property::FontSize,
+            PropertyValue::Length(16.0, LengthUnit::Px),
+        );
+
         map1.merge(&map2);
-        
+
         assert_eq!(map1.len(), 2);
         assert!(map1.has_property(&Property::Color));
         assert!(map1.has_property(&Property::FontSize));

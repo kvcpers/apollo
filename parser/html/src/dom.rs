@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
 use crate::error::HtmlResult;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// DOM Node types
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -127,9 +127,22 @@ impl Element {
 
     /// Check if element is a void element (cannot have children)
     pub fn is_void_element(tag_name: &str) -> bool {
-        matches!(tag_name.to_lowercase().as_str(),
-            "area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" |
-            "link" | "meta" | "param" | "source" | "track" | "wbr"
+        matches!(
+            tag_name.to_lowercase().as_str(),
+            "area"
+                | "base"
+                | "br"
+                | "col"
+                | "embed"
+                | "hr"
+                | "img"
+                | "input"
+                | "link"
+                | "meta"
+                | "param"
+                | "source"
+                | "track"
+                | "wbr"
         )
     }
 
@@ -164,7 +177,7 @@ impl Element {
         match selector.chars().next() {
             Some('#') => {
                 let id = &selector[1..];
-                self.get_id().map_or(false, |element_id| element_id == id)
+                self.get_id().is_some_and(|element_id| element_id == id)
             }
             Some('.') => {
                 let class = &selector[1..];
@@ -214,6 +227,12 @@ impl Document {
     }
 }
 
+impl Default for Document {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// DOM Tree for managing nodes
 #[derive(Debug, Clone, PartialEq)]
 pub struct DomTree {
@@ -260,12 +279,12 @@ impl DomTree {
             let parent = &self.nodes[parent_id];
             parent.children.last().copied()
         };
-        
+
         if let Some(last_child_id) = last_child_id {
             self.nodes[last_child_id].next_sibling = Some(child_id);
             self.nodes[child_id].previous_sibling = Some(last_child_id);
         }
-        
+
         // Add child to parent and set parent on child
         self.nodes[parent_id].children.push(child_id);
         self.nodes[child_id].parent = Some(parent_id);
@@ -290,7 +309,11 @@ impl DomTree {
         };
 
         // Remove from parent's children list
-        if let Some(pos) = self.nodes[parent_id].children.iter().position(|&id| id == child_id) {
+        if let Some(pos) = self.nodes[parent_id]
+            .children
+            .iter()
+            .position(|&id| id == child_id)
+        {
             self.nodes[parent_id].children.remove(pos);
         }
 
@@ -298,7 +321,7 @@ impl DomTree {
         self.nodes[child_id].parent = None;
         self.nodes[child_id].previous_sibling = None;
         self.nodes[child_id].next_sibling = None;
-        
+
         // Update sibling links
         if let Some(prev) = prev_sibling {
             self.nodes[prev].next_sibling = next_sibling;
@@ -313,7 +336,10 @@ impl DomTree {
     pub fn get_element_by_id(&self, id: &str) -> Option<usize> {
         for (node_id, node) in self.nodes.iter().enumerate() {
             if let Some(element) = node.as_element() {
-                if element.get_id().map_or(false, |element_id| element_id == id) {
+                if element
+                    .get_id()
+                    .is_some_and(|element_id| element_id == id)
+                {
                     return Some(node_id);
                 }
             }
@@ -401,7 +427,7 @@ mod tests {
     #[test]
     fn test_dom_tree_operations() {
         let mut tree = DomTree::new();
-        
+
         let root = tree.add_node(Node::element("html".to_string()));
         let head = tree.add_node(Node::element("head".to_string()));
         let body = tree.add_node(Node::element("body".to_string()));

@@ -1,6 +1,6 @@
 use crate::error::{BrowserError, BrowserResult};
-use html_parser::HtmlEngine;
 use css_parser::CssEngine;
+use html_parser::HtmlEngine;
 
 /// Browser engine that coordinates all browser components
 pub struct BrowserEngine {
@@ -24,23 +24,23 @@ impl BrowserEngine {
         }
 
         tracing::info!("Initializing browser engine components");
-        
+
         // Initialize HTML parser
         tracing::debug!("HTML parser initialized");
-        
+
         // Initialize CSS parser
         tracing::debug!("CSS parser initialized");
-        
+
         // Initialize other components as needed
         // - JavaScript engine
         // - Layout engine
         // - Rendering engine
         // - Network stack
         // - Storage systems
-        
+
         self.is_initialized = true;
         tracing::info!("Browser engine initialized successfully");
-        
+
         Ok(())
     }
 
@@ -50,20 +50,26 @@ impl BrowserEngine {
 
     /// Parse HTML content
     pub fn parse_html(&mut self, html: &str) -> BrowserResult<html_parser::Document> {
-        self.html_engine.parse_html(html)
+        self.html_engine
+            .parse_html(html)
             .map_err(|e| BrowserError::ParseError(format!("HTML parsing failed: {}", e)))
     }
 
     /// Parse CSS content
     pub fn parse_css(&mut self, css: &str) -> BrowserResult<css_parser::Stylesheet> {
-        self.css_engine.parse_stylesheet(css)
+        self.css_engine
+            .parse_stylesheet(css)
             .map_err(|e| BrowserError::ParseError(format!("CSS parsing failed: {}", e)))
     }
 
     /// Process a complete HTML document with CSS
-    pub fn process_document(&mut self, html: &str, css: Option<&str>) -> BrowserResult<ProcessedDocument> {
+    pub fn process_document(
+        &mut self,
+        html: &str,
+        css: Option<&str>,
+    ) -> BrowserResult<ProcessedDocument> {
         let document = self.parse_html(html)?;
-        
+
         let stylesheet = if let Some(css_content) = css {
             Some(self.parse_css(css_content)?)
         } else {
@@ -111,7 +117,10 @@ pub struct ProcessedDocument {
 }
 
 impl ProcessedDocument {
-    pub fn new(document: html_parser::Document, stylesheet: Option<css_parser::Stylesheet>) -> Self {
+    pub fn new(
+        document: html_parser::Document,
+        stylesheet: Option<css_parser::Stylesheet>,
+    ) -> Self {
         Self {
             document,
             stylesheet,
@@ -155,10 +164,10 @@ mod tests {
     async fn test_html_parsing() {
         let mut engine = BrowserEngine::new();
         engine.initialize().await.unwrap();
-        
+
         let html = "<html><head><title>Test</title></head><body><h1>Hello World</h1></body></html>";
         let document = engine.parse_html(html).unwrap();
-        
+
         assert!(document.document_element.is_some());
     }
 
@@ -166,10 +175,10 @@ mod tests {
     async fn test_css_parsing() {
         let mut engine = BrowserEngine::new();
         engine.initialize().await.unwrap();
-        
+
         let css = "body { color: red; } h1 { font-size: 24px; }";
         let stylesheet = engine.parse_css(css).unwrap();
-        
+
         assert_eq!(stylesheet.rules.len(), 2);
     }
 
@@ -177,12 +186,12 @@ mod tests {
     async fn test_document_processing() {
         let mut engine = BrowserEngine::new();
         engine.initialize().await.unwrap();
-        
+
         let html = "<html><body><h1>Hello</h1></body></html>";
         let css = "h1 { color: blue; }";
-        
+
         let processed = engine.process_document(html, Some(css)).unwrap();
-        
+
         assert!(processed.has_stylesheet());
         assert!(processed.document().document_element.is_some());
     }

@@ -1,11 +1,11 @@
-pub mod url;
 pub mod error;
 pub mod parser;
+pub mod url;
 pub mod utils;
 
-pub use url::Url;
 pub use error::{UrlError, UrlResult};
 pub use parser::UrlParser;
+pub use url::Url;
 pub use utils::*;
 
 #[cfg(test)]
@@ -34,7 +34,7 @@ mod tests {
     fn test_url_encoding() {
         let encoded = encode_component("hello world");
         assert_eq!(encoded, "hello%20world");
-        
+
         let decoded = decode_component("hello%20world").unwrap();
         assert_eq!(decoded, "hello world");
     }

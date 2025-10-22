@@ -1,5 +1,7 @@
 use crate::computed_style::ComputedStyle;
-use css_parser::properties::{Color, Length, FontWeight, FontStyle, TextAlign, TextDecoration, LineHeight};
+use css_parser::properties::{
+    Color, FontStyle, FontWeight, Length, LineHeight, TextAlign, TextDecoration,
+};
 
 /// Inheritance implementation for CSS properties
 pub struct Inheritance {
@@ -10,7 +12,7 @@ pub struct Inheritance {
 impl Inheritance {
     pub fn new() -> Self {
         let mut inheritable_properties = std::collections::HashSet::new();
-        
+
         // Typography properties
         inheritable_properties.insert("font-family".to_string());
         inheritable_properties.insert("font-size".to_string());
@@ -23,7 +25,7 @@ impl Inheritance {
         inheritable_properties.insert("font-language-override".to_string());
         inheritable_properties.insert("font-feature-settings".to_string());
         inheritable_properties.insert("font-variation-settings".to_string());
-        
+
         // Text properties
         inheritable_properties.insert("color".to_string());
         inheritable_properties.insert("text-align".to_string());
@@ -49,7 +51,7 @@ impl Inheritance {
         inheritable_properties.insert("text-underline-position".to_string());
         inheritable_properties.insert("text-underline-offset".to_string());
         inheritable_properties.insert("text-decoration-thickness".to_string());
-        
+
         // Spacing properties
         inheritable_properties.insert("letter-spacing".to_string());
         inheritable_properties.insert("word-spacing".to_string());
@@ -65,19 +67,19 @@ impl Inheritance {
         inheritable_properties.insert("hyphenate-limit-zone".to_string());
         inheritable_properties.insert("hyphenate-limit-last".to_string());
         inheritable_properties.insert("hyphenate-limit-zone".to_string());
-        
+
         // List properties
         inheritable_properties.insert("list-style-type".to_string());
         inheritable_properties.insert("list-style-position".to_string());
         inheritable_properties.insert("list-style-image".to_string());
-        
+
         // Table properties
         inheritable_properties.insert("border-collapse".to_string());
         inheritable_properties.insert("border-spacing".to_string());
         inheritable_properties.insert("caption-side".to_string());
         inheritable_properties.insert("empty-cells".to_string());
         inheritable_properties.insert("table-layout".to_string());
-        
+
         // Other properties
         inheritable_properties.insert("cursor".to_string());
         inheritable_properties.insert("visibility".to_string());
@@ -101,12 +103,12 @@ impl Inheritance {
         inheritable_properties.insert("text-underline-position".to_string());
         inheritable_properties.insert("text-underline-offset".to_string());
         inheritable_properties.insert("text-decoration-thickness".to_string());
-        
+
         Self {
             inheritable_properties,
         }
     }
-    
+
     /// Apply inheritance from parent to child computed style
     pub fn apply_inheritance(&self, child_style: &mut ComputedStyle, parent_style: &ComputedStyle) {
         // Typography properties
@@ -131,7 +133,7 @@ impl Inheritance {
         if self.inheritable_properties.contains("word-spacing") {
             child_style.word_spacing = parent_style.word_spacing;
         }
-        
+
         // Text properties
         if self.inheritable_properties.contains("color") {
             child_style.color = parent_style.color;
@@ -154,7 +156,7 @@ impl Inheritance {
         if self.inheritable_properties.contains("text-shadow") {
             child_style.text_shadow = parent_style.text_shadow.clone();
         }
-        
+
         // Other properties
         if self.inheritable_properties.contains("cursor") {
             child_style.cursor = parent_style.cursor.clone();
@@ -163,27 +165,27 @@ impl Inheritance {
             child_style.visibility = parent_style.visibility;
         }
     }
-    
+
     /// Check if a property inherits by default
     pub fn is_inheritable(&self, property_name: &str) -> bool {
         self.inheritable_properties.contains(property_name)
     }
-    
+
     /// Get all inheritable properties
     pub fn get_inheritable_properties(&self) -> &std::collections::HashSet<String> {
         &self.inheritable_properties
     }
-    
+
     /// Add a property to the inheritable set
     pub fn add_inheritable_property(&mut self, property_name: String) {
         self.inheritable_properties.insert(property_name);
     }
-    
+
     /// Remove a property from the inheritable set
     pub fn remove_inheritable_property(&mut self, property_name: &str) {
         self.inheritable_properties.remove(property_name);
     }
-    
+
     /// Apply inheritance for specific properties
     pub fn apply_specific_inheritance(
         &self,
@@ -249,7 +251,7 @@ impl Inheritance {
             }
         }
     }
-    
+
     /// Apply inheritance for computed values (after cascade)
     pub fn apply_computed_inheritance(
         &self,
@@ -258,11 +260,11 @@ impl Inheritance {
     ) {
         // Apply inheritance for all inheritable properties
         self.apply_inheritance(child_style, parent_style);
-        
+
         // Apply special inheritance rules
         self.apply_special_inheritance(child_style, parent_style);
     }
-    
+
     /// Apply special inheritance rules
     fn apply_special_inheritance(
         &self,
@@ -270,17 +272,20 @@ impl Inheritance {
         parent_style: &ComputedStyle,
     ) {
         // Font-size inheritance with relative units
-        if matches!(child_style.font_size, Length::Em(_) | Length::Rem(_) | Length::Percentage(_)) {
+        if matches!(
+            child_style.font_size,
+            Length::Em(_) | Length::Rem(_) | Length::Percentage(_)
+        ) {
             // Font-size with relative units inherits the computed value
             child_style.font_size = parent_style.font_size;
         }
-        
+
         // Line-height inheritance with relative units
         if matches!(child_style.line_height, LineHeight::Percentage(_)) {
             // Line-height with percentage inherits the computed value
             child_style.line_height = parent_style.line_height;
         }
-        
+
         // Letter-spacing and word-spacing inheritance
         if matches!(child_style.letter_spacing, Length::Em(_) | Length::Rem(_)) {
             child_style.letter_spacing = parent_style.letter_spacing;
@@ -288,34 +293,37 @@ impl Inheritance {
         if matches!(child_style.word_spacing, Length::Em(_) | Length::Rem(_)) {
             child_style.word_spacing = parent_style.word_spacing;
         }
-        
+
         // Text-indent inheritance with relative units
-        if matches!(child_style.text_indent, Length::Em(_) | Length::Rem(_) | Length::Percentage(_)) {
+        if matches!(
+            child_style.text_indent,
+            Length::Em(_) | Length::Rem(_) | Length::Percentage(_)
+        ) {
             child_style.text_indent = parent_style.text_indent;
         }
     }
-    
+
     /// Check if a property value inherits
     pub fn property_value_inherits(&self, property_name: &str, value: &str) -> bool {
         // Check if the property is inheritable
         if !self.inheritable_properties.contains(property_name) {
             return false;
         }
-        
+
         // Check if the value is 'inherit'
         value == "inherit"
     }
-    
+
     /// Check if a property value is 'initial'
     pub fn property_value_is_initial(&self, property_name: &str, value: &str) -> bool {
         value == "initial"
     }
-    
+
     /// Check if a property value is 'unset'
     pub fn property_value_is_unset(&self, property_name: &str, value: &str) -> bool {
         value == "unset"
     }
-    
+
     /// Check if a property value is 'revert'
     pub fn property_value_is_revert(&self, property_name: &str, value: &str) -> bool {
         value == "revert"
@@ -331,7 +339,7 @@ impl Default for Inheritance {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use css_parser::properties::{Display, Position, Float, Clear, Visibility};
+    use css_parser::properties::{Clear, Display, Float, Position, Visibility};
 
     #[test]
     fn test_inheritance_creation() {
@@ -354,13 +362,13 @@ mod tests {
         let inheritance = Inheritance::new();
         let mut child_style = ComputedStyle::new();
         let mut parent_style = ComputedStyle::new();
-        
+
         parent_style.color = Color::Rgb(255, 0, 0);
         parent_style.font_size = Length::Px(18.0);
         parent_style.font_weight = FontWeight::Bold;
-        
+
         inheritance.apply_inheritance(&mut child_style, &parent_style);
-        
+
         assert_eq!(child_style.color, Color::Rgb(255, 0, 0));
         assert_eq!(child_style.font_size, Length::Px(18.0));
         assert_eq!(child_style.font_weight, FontWeight::Bold);
@@ -371,13 +379,17 @@ mod tests {
         let inheritance = Inheritance::new();
         let mut child_style = ComputedStyle::new();
         let mut parent_style = ComputedStyle::new();
-        
+
         parent_style.color = Color::Rgb(255, 0, 0);
         parent_style.font_size = Length::Px(18.0);
         parent_style.display = Display::Block;
-        
-        inheritance.apply_specific_inheritance(&mut child_style, &parent_style, &["color".to_string()]);
-        
+
+        inheritance.apply_specific_inheritance(
+            &mut child_style,
+            &parent_style,
+            &["color".to_string()],
+        );
+
         assert_eq!(child_style.color, Color::Rgb(255, 0, 0));
         assert_ne!(child_style.font_size, Length::Px(18.0)); // Should not inherit
         assert_ne!(child_style.display, Display::Block); // Should not inherit
@@ -386,17 +398,17 @@ mod tests {
     #[test]
     fn test_property_value_checks() {
         let inheritance = Inheritance::new();
-        
+
         assert!(inheritance.property_value_inherits("color", "inherit"));
         assert!(!inheritance.property_value_inherits("color", "red"));
         assert!(!inheritance.property_value_inherits("display", "inherit"));
-        
+
         assert!(inheritance.property_value_is_initial("color", "initial"));
         assert!(!inheritance.property_value_is_initial("color", "red"));
-        
+
         assert!(inheritance.property_value_is_unset("color", "unset"));
         assert!(!inheritance.property_value_is_unset("color", "red"));
-        
+
         assert!(inheritance.property_value_is_revert("color", "revert"));
         assert!(!inheritance.property_value_is_revert("color", "red"));
     }

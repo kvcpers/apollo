@@ -100,17 +100,17 @@ impl Url {
         self.fragment = fragment;
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn serialize(&self) -> String {
         let mut result = String::new();
-        
+
         if !self.scheme.is_empty() {
             result.push_str(&self.scheme);
-            result.push_str(":");
+            result.push(':');
         }
-        
+
         if let Some(host) = &self.host {
             result.push_str("//");
-            
+
             if let Some(username) = &self.username {
                 result.push_str(username);
                 if let Some(password) = &self.password {
@@ -119,27 +119,27 @@ impl Url {
                 }
                 result.push('@');
             }
-            
+
             result.push_str(host);
-            
+
             if let Some(port) = self.port {
                 result.push(':');
                 result.push_str(&port.to_string());
             }
         }
-        
+
         result.push_str(&self.path);
-        
+
         if let Some(query) = &self.query {
             result.push('?');
             result.push_str(query);
         }
-        
+
         if let Some(fragment) = &self.fragment {
             result.push('#');
             result.push_str(fragment);
         }
-        
+
         result
     }
 
@@ -188,7 +188,10 @@ impl Url {
     }
 
     pub fn is_special(&self) -> bool {
-        matches!(self.scheme.as_str(), "http" | "https" | "ws" | "wss" | "ftp" | "file")
+        matches!(
+            self.scheme.as_str(),
+            "http" | "https" | "ws" | "wss" | "ftp" | "file"
+        )
     }
 
     pub fn is_valid(&self) -> bool {
@@ -211,7 +214,8 @@ impl Url {
         if params.is_empty() {
             self.query = None;
         } else {
-            let query = params.iter()
+            let query = params
+                .iter()
                 .map(|(k, v)| format!("{}={}", k, v))
                 .collect::<Vec<_>>()
                 .join("&");
@@ -228,6 +232,6 @@ impl Default for Url {
 
 impl std::fmt::Display for Url {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", self.serialize())
     }
 }

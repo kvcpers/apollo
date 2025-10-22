@@ -1,9 +1,9 @@
 use crate::error::{HttpError, HttpResult};
 use crate::response::HttpResponse;
-use url_parser::Url;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH, Duration};
-use serde::{Serialize, Deserialize};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use url_parser::Url;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CacheEntry {
@@ -78,7 +78,9 @@ impl CacheEntry {
     }
 
     pub fn age(&self) -> Duration {
-        SystemTime::now().duration_since(self.timestamp).unwrap_or_default()
+        SystemTime::now()
+            .duration_since(self.timestamp)
+            .unwrap_or_default()
     }
 
     pub fn remaining_ttl(&self) -> Option<Duration> {
@@ -114,7 +116,7 @@ impl CacheEntry {
     pub fn is_cacheable(&self) -> bool {
         let status = self.response.status();
         let cache_control = self.response.cache_control();
-        
+
         // Check if response is cacheable
         if status >= 200 && status < 300 {
             // Check for no-cache or no-store directives
@@ -189,7 +191,11 @@ impl HttpCache {
     }
 
     pub fn get(&mut self, url: &str) -> Option<&CacheEntry> {
-        let is_expired = self.entries.get(url).map(|entry| entry.is_expired()).unwrap_or(false);
+        let is_expired = self
+            .entries
+            .get(url)
+            .map(|entry| entry.is_expired())
+            .unwrap_or(false);
         if is_expired {
             self.entries.remove(url);
             self.misses += 1;
@@ -205,22 +211,25 @@ impl HttpCache {
 
     pub fn set(&mut self, url: &str, response: HttpResponse) -> HttpResult<()> {
         let mut entry = CacheEntry::new(response);
-        
+
         // Extract cache-related headers
         if let Some(etag) = entry.response().etag() {
             entry.set_etag(Some(etag.to_string()));
         }
-        
+
         if let Some(last_modified) = entry.response().last_modified() {
             entry.set_last_modified(Some(last_modified.to_string()));
         }
-        
+
         let cache_control = entry.response().cache_control().map(|s| s.to_string());
         if let Some(ref cache_control) = cache_control {
             entry.set_cache_control(Some(cache_control.clone()));
-            
+
             // Parse max-age directive
-            if let Some(max_age_str) = cache_control.split(',').find(|s| s.trim().starts_with("max-age=")) {
+            if let Some(max_age_str) = cache_control
+                .split(',')
+                .find(|s| s.trim().starts_with("max-age="))
+            {
                 if let Some(max_age) = max_age_str.split('=').nth(1) {
                     if let Ok(seconds) = max_age.trim().parse::<u64>() {
                         entry.set_max_age(Some(Duration::from_secs(seconds)));
@@ -228,27 +237,27 @@ impl HttpCache {
                 }
             }
         }
-        
+
         if let Some(vary) = entry.response().vary() {
             entry.set_vary(Some(vary.to_string()));
         }
-        
+
         if let Some(expires) = entry.response().expires() {
             // This is a simplified implementation
             // In a real implementation, we would parse the date properly
             entry.set_expires(Some(SystemTime::now() + Duration::from_secs(3600)));
         }
-        
+
         // Check if entry is cacheable
         if !entry.is_cacheable() {
             return Ok(());
         }
-        
+
         // Check cache size limit
         if self.entries.len() >= self.max_size {
             self.evict_oldest();
         }
-        
+
         self.entries.insert(url.to_string(), entry);
         Ok(())
     }
@@ -312,8 +321,11 @@ impl HttpCache {
     }
 
     pub fn evict_oldest(&mut self) {
-        if let Some((oldest_url, _)) = self.entries.iter()
-            .min_by_key(|(_, entry)| entry.timestamp()) {
+        if let Some((oldest_url, _)) = self
+            .entries
+            .iter()
+            .min_by_key(|(_, entry)| entry.timestamp())
+        {
             let oldest_url = oldest_url.clone();
             self.entries.remove(&oldest_url);
         }
@@ -357,7 +369,10 @@ impl HttpCache {
     }
 
     pub fn to_vec(&self) -> Vec<(String, CacheEntry)> {
-        self.entries.iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+        self.entries
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
     }
 
     pub fn from_vec(entries: Vec<(String, CacheEntry)>) -> Self {

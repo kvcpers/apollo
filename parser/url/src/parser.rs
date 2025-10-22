@@ -75,9 +75,8 @@ impl UrlParser {
     pub fn parse_relative(input: &str, base: &Url) -> UrlResult<Url> {
         let mut url = base.clone();
 
-        if input.starts_with("//") {
+        if let Some(authority) = input.strip_prefix("//") {
             // Protocol-relative URL
-            let authority = &input[2..];
             Self::parse_authority(authority, &mut url)?;
         } else if input.starts_with('/') {
             // Absolute path

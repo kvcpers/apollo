@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::error::CssResult;
+use serde::{Deserialize, Serialize};
 
 /// CSS selector with specificity
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -19,8 +19,8 @@ pub struct SelectorList {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum SimpleSelector {
     Universal,
-    Type(String), // Element type (div, span, etc.)
-    Id(String),   // ID selector (#id)
+    Type(String),  // Element type (div, span, etc.)
+    Id(String),    // ID selector (#id)
     Class(String), // Class selector (.class)
     Attribute {
         name: String,
@@ -34,22 +34,22 @@ pub enum SimpleSelector {
 /// Attribute selector operators
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum AttributeOperator {
-    Exists,           // [attr]
-    Equals,           // [attr=value]
-    Includes,         // [attr~=value]
-    DashMatch,        // [attr|=value]
-    PrefixMatch,      // [attr^=value]
-    SuffixMatch,      // [attr$=value]
-    SubstringMatch,   // [attr*=value]
+    Exists,         // [attr]
+    Equals,         // [attr=value]
+    Includes,       // [attr~=value]
+    DashMatch,      // [attr|=value]
+    PrefixMatch,    // [attr^=value]
+    SuffixMatch,    // [attr$=value]
+    SubstringMatch, // [attr*=value]
 }
 
 /// CSS combinators between selectors
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Combinator {
-    Descendant,       // (space) - descendant selector
-    Child,            // > - child selector
-    AdjacentSibling,  // + - adjacent sibling selector
-    GeneralSibling,   // ~ - general sibling selector
+    Descendant,      // (space) - descendant selector
+    Child,           // > - child selector
+    AdjacentSibling, // + - adjacent sibling selector
+    GeneralSibling,  // ~ - general sibling selector
 }
 
 /// Pseudo-class selectors
@@ -125,11 +125,10 @@ impl Selector {
         for part in &self.parts {
             match part {
                 SimpleSelector::Id(_) => a += 1,
-                SimpleSelector::Class(_) | 
-                SimpleSelector::Attribute { .. } | 
-                SimpleSelector::PseudoClass(_) => b += 1,
-                SimpleSelector::Type(_) | 
-                SimpleSelector::PseudoElement(_) => c += 1,
+                SimpleSelector::Class(_)
+                | SimpleSelector::Attribute { .. }
+                | SimpleSelector::PseudoClass(_) => b += 1,
+                SimpleSelector::Type(_) | SimpleSelector::PseudoElement(_) => c += 1,
                 SimpleSelector::Universal => {
                     // Universal selector has specificity (0,0,0)
                 }
@@ -140,10 +139,14 @@ impl Selector {
     }
 
     /// Check if this selector matches a given element
-    pub fn matches_element(&self, element: &html_parser::Element, context: &SelectorMatchContext) -> bool {
+    pub fn matches_element(
+        &self,
+        element: &html_parser::Element,
+        context: &SelectorMatchContext,
+    ) -> bool {
         // Simplified matching - in a real implementation, this would be more complex
         // considering combinators and the full selector chain
-        
+
         if self.parts.is_empty() {
             return false;
         }
@@ -153,15 +156,26 @@ impl Selector {
         self.simple_selector_matches(last_part, element, context)
     }
 
-    fn simple_selector_matches(&self, selector: &SimpleSelector, element: &html_parser::Element, context: &SelectorMatchContext) -> bool {
+    fn simple_selector_matches(
+        &self,
+        selector: &SimpleSelector,
+        element: &html_parser::Element,
+        context: &SelectorMatchContext,
+    ) -> bool {
         match selector {
             SimpleSelector::Universal => true,
-            SimpleSelector::Type(tag_name) => element.tag_name.to_lowercase() == tag_name.to_lowercase(),
-            SimpleSelector::Id(id) => element.get_id().map_or(false, |element_id| element_id == id),
-            SimpleSelector::Class(class) => element.get_class_list().contains(&class.as_str()),
-            SimpleSelector::Attribute { name, operator, value } => {
-                self.attribute_matches(element, name, operator, value.as_deref())
+            SimpleSelector::Type(tag_name) => {
+                element.tag_name.to_lowercase() == tag_name.to_lowercase()
             }
+            SimpleSelector::Id(id) => element
+                .get_id()
+                .map_or(false, |element_id| element_id == id),
+            SimpleSelector::Class(class) => element.get_class_list().contains(&class.as_str()),
+            SimpleSelector::Attribute {
+                name,
+                operator,
+                value,
+            } => self.attribute_matches(element, name, operator, value.as_deref()),
             SimpleSelector::PseudoClass(pseudo) => {
                 self.pseudo_class_matches(pseudo, element, context)
             }
@@ -172,7 +186,13 @@ impl Selector {
         }
     }
 
-    fn attribute_matches(&self, element: &html_parser::Element, name: &str, operator: &AttributeOperator, value: Option<&str>) -> bool {
+    fn attribute_matches(
+        &self,
+        element: &html_parser::Element,
+        name: &str,
+        operator: &AttributeOperator,
+        value: Option<&str>,
+    ) -> bool {
         let element_value = match element.get_attribute(name) {
             Some(val) => val,
             None => return matches!(operator, AttributeOperator::Exists),
@@ -219,15 +239,19 @@ impl Selector {
         }
     }
 
-    fn pseudo_class_matches(&self, pseudo: &PseudoClass, element: &html_parser::Element, context: &SelectorMatchContext) -> bool {
+    fn pseudo_class_matches(
+        &self,
+        pseudo: &PseudoClass,
+        element: &html_parser::Element,
+        context: &SelectorMatchContext,
+    ) -> bool {
         match pseudo {
             PseudoClass::Hover => context.is_hovered,
             PseudoClass::Active => context.is_active,
             PseudoClass::Focus => context.is_focused,
             PseudoClass::Visited => context.is_visited,
             PseudoClass::Link => {
-                element.tag_name.to_lowercase() == "a" && 
-                element.get_attribute("href").is_some()
+                element.tag_name.to_lowercase() == "a" && element.get_attribute("href").is_some()
             }
             PseudoClass::FirstChild => context.is_first_child,
             PseudoClass::LastChild => context.is_last_child,
@@ -270,8 +294,14 @@ impl SelectorList {
     }
 
     /// Check if any selector in the list matches the element
-    pub fn matches_element(&self, element: &html_parser::Element, context: &SelectorMatchContext) -> bool {
-        self.selectors.iter().any(|selector| selector.matches_element(element, context))
+    pub fn matches_element(
+        &self,
+        element: &html_parser::Element,
+        context: &SelectorMatchContext,
+    ) -> bool {
+        self.selectors
+            .iter()
+            .any(|selector| selector.matches_element(element, context))
     }
 }
 
@@ -336,14 +366,14 @@ mod tests {
     #[test]
     fn test_simple_selector_matching() {
         use crate::dom::Element;
-        
+
         let mut element = Element::new("div".to_string());
         element.set_attribute("id".to_string(), "test".to_string());
         element.set_attribute("class".to_string(), "container main".to_string());
 
         let mut selector = Selector::new();
         selector.add_simple_selector(SimpleSelector::Type("div".to_string()));
-        
+
         let context = SelectorMatchContext::default();
         assert!(selector.matches_element(&element, &context));
 
@@ -359,7 +389,7 @@ mod tests {
     #[test]
     fn test_attribute_selector_matching() {
         use crate::dom::Element;
-        
+
         let mut element = Element::new("input".to_string());
         element.set_attribute("type".to_string(), "text".to_string());
         element.set_attribute("data-value".to_string(), "test".to_string());

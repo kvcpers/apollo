@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
 /// CSS selector specificity
-/// 
+///
 /// Specificity is calculated as a 3-tuple (a, b, c) where:
 /// - a: number of ID selectors
 /// - b: number of class selectors, attribute selectors, and pseudo-class selectors
@@ -73,9 +73,9 @@ impl std::fmt::Display for Specificity {
 /// CSS cascade origin
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum CascadeOrigin {
-    UserAgent = 0,    // Browser default styles
-    User = 1,         // User stylesheets
-    Author = 2,       // Author stylesheets
+    UserAgent = 0,       // Browser default styles
+    User = 1,            // User stylesheets
+    Author = 2,          // Author stylesheets
     AuthorImportant = 3, // Author stylesheets with !important
     UserImportant = 4,   // User stylesheets with !important
 }
@@ -218,32 +218,20 @@ mod tests {
     fn test_specificity_addition() {
         let mut spec = Specificity::new(0, 1, 1); // div.class
         spec.add(&Specificity::new(0, 1, 0)); // .another-class
-        
+
         assert_eq!(spec, Specificity::new(0, 2, 1));
     }
 
     #[test]
     fn test_cascade_context_comparison() {
-        let context1 = CascadeContext::new(
-            CascadeOrigin::Author,
-            Specificity::new(0, 1, 0),
-            1
-        );
-        
-        let context2 = CascadeContext::new(
-            CascadeOrigin::Author,
-            Specificity::new(1, 0, 0),
-            0
-        );
+        let context1 = CascadeContext::new(CascadeOrigin::Author, Specificity::new(0, 1, 0), 1);
+
+        let context2 = CascadeContext::new(CascadeOrigin::Author, Specificity::new(1, 0, 0), 0);
 
         // Higher specificity wins
         assert!(context2.wins_over(&context1));
 
-        let context3 = CascadeContext::new(
-            CascadeOrigin::UserAgent,
-            Specificity::new(0, 1, 0),
-            0
-        );
+        let context3 = CascadeContext::new(CascadeOrigin::UserAgent, Specificity::new(0, 1, 0), 0);
 
         // Author origin wins over user agent
         assert!(context1.wins_over(&context3));
@@ -254,13 +242,13 @@ mod tests {
         let result1 = CascadeResult::new(
             "red",
             CascadeContext::new(CascadeOrigin::Author, Specificity::new(0, 1, 0), 1),
-            false
+            false,
         );
-        
+
         let result2 = CascadeResult::new(
             "blue",
             CascadeContext::new(CascadeOrigin::Author, Specificity::new(1, 0, 0), 0),
-            false
+            false,
         );
 
         // Higher specificity wins
@@ -269,7 +257,7 @@ mod tests {
         let result3 = CascadeResult::new(
             "green",
             CascadeContext::new(CascadeOrigin::Author, Specificity::new(0, 1, 0), 0),
-            true
+            true,
         );
 
         // Important wins over non-important
@@ -286,17 +274,11 @@ mod tests {
         assert!(layer2 > layer1);
         assert!(layer3 > layer2);
 
-        let context1 = CascadeContext::new(
-            CascadeOrigin::Author,
-            Specificity::new(0, 1, 0),
-            0
-        ).with_layer(layer1);
+        let context1 = CascadeContext::new(CascadeOrigin::Author, Specificity::new(0, 1, 0), 0)
+            .with_layer(layer1);
 
-        let context2 = CascadeContext::new(
-            CascadeOrigin::Author,
-            Specificity::new(0, 1, 0),
-            0
-        ).with_layer(layer2);
+        let context2 = CascadeContext::new(CascadeOrigin::Author, Specificity::new(0, 1, 0), 0)
+            .with_layer(layer2);
 
         // Later layer wins
         assert!(context2.wins_over(&context1));

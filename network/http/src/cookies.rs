@@ -1,8 +1,8 @@
 use crate::error::{HttpError, HttpResult};
-use url_parser::Url;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
-use serde::{Serialize, Deserialize};
+use url_parser::Url;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Cookie {
@@ -137,33 +137,33 @@ impl Cookie {
 
     pub fn to_set_cookie_string(&self) -> String {
         let mut result = format!("{}={}", self.name, self.value);
-        
+
         if let Some(domain) = &self.domain {
             result.push_str(&format!("; Domain={}", domain));
         }
-        
+
         if let Some(path) = &self.path {
             result.push_str(&format!("; Path={}", path));
         }
-        
+
         if let Some(expires) = self.expires {
             // This is a simplified implementation
             // In a real implementation, we would format the date properly
             result.push_str("; Expires=Thu, 01 Jan 2038 00:00:00 GMT");
         }
-        
+
         if let Some(max_age) = self.max_age {
             result.push_str(&format!("; Max-Age={}", max_age));
         }
-        
+
         if self.secure {
             result.push_str("; Secure");
         }
-        
+
         if self.http_only {
             result.push_str("; HttpOnly");
         }
-        
+
         if let Some(same_site) = &self.same_site {
             match same_site {
                 SameSite::Strict => result.push_str("; SameSite=Strict"),
@@ -171,7 +171,7 @@ impl Cookie {
                 SameSite::None => result.push_str("; SameSite=None"),
             }
         }
-        
+
         result
     }
 }
@@ -227,13 +227,15 @@ impl CookieJar {
     pub fn parse_set_cookie(&mut self, set_cookie: &str) -> HttpResult<()> {
         let parts: Vec<&str> = set_cookie.split(';').collect();
         if parts.is_empty() {
-            return Err(HttpError::InvalidCookie("Empty Set-Cookie header".to_string()));
+            return Err(HttpError::InvalidCookie(
+                "Empty Set-Cookie header".to_string(),
+            ));
         }
 
         let name_value = parts[0].trim();
         if let Some((name, value)) = name_value.split_once('=') {
             let mut cookie = Cookie::new(name.to_string(), value.to_string());
-            
+
             for part in &parts[1..] {
                 let part = part.trim();
                 if let Some((key, value)) = part.split_once('=') {
@@ -258,30 +260,34 @@ impl CookieJar {
                     }
                 }
             }
-            
+
             self.set(cookie);
             Ok(())
         } else {
-            Err(HttpError::InvalidCookie("Invalid cookie format".to_string()))
+            Err(HttpError::InvalidCookie(
+                "Invalid cookie format".to_string(),
+            ))
         }
     }
 
     pub fn parse_set_cookie_with_url(&mut self, set_cookie: &str, url: &Url) -> HttpResult<()> {
         let parts: Vec<&str> = set_cookie.split(';').collect();
         if parts.is_empty() {
-            return Err(HttpError::InvalidCookie("Empty Set-Cookie header".to_string()));
+            return Err(HttpError::InvalidCookie(
+                "Empty Set-Cookie header".to_string(),
+            ));
         }
 
         let name_value = parts[0].trim();
         if let Some((name, value)) = name_value.split_once('=') {
             let mut cookie = Cookie::new(name.to_string(), value.to_string());
-            
+
             // Set default domain and path from URL
             if let Some(host) = url.host() {
                 cookie.set_domain(Some(host.to_string()));
             }
             cookie.set_path(Some(url.path().to_string()));
-            
+
             for part in &parts[1..] {
                 let part = part.trim();
                 if let Some((key, value)) = part.split_once('=') {
@@ -306,23 +312,28 @@ impl CookieJar {
                     }
                 }
             }
-            
+
             self.set(cookie);
             Ok(())
         } else {
-            Err(HttpError::InvalidCookie("Invalid cookie format".to_string()))
+            Err(HttpError::InvalidCookie(
+                "Invalid cookie format".to_string(),
+            ))
         }
     }
 
     pub fn get_cookies_for_url(&self, url: &Url) -> Vec<String> {
         let mut cookies = Vec::new();
-        
+
         for cookie in self.cookies.values() {
-            if !cookie.is_expired() && cookie.matches_domain(url.host().unwrap_or("")) && cookie.matches_path(url.path()) {
+            if !cookie.is_expired()
+                && cookie.matches_domain(url.host().unwrap_or(""))
+                && cookie.matches_path(url.path())
+            {
                 cookies.push(cookie.to_string());
             }
         }
-        
+
         cookies
     }
 

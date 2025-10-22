@@ -1,5 +1,5 @@
-use crate::error::{BrowserError, BrowserResult};
 use crate::document::Document;
+use crate::error::{BrowserError, BrowserResult};
 use crate::navigation::NavigationController;
 use std::collections::VecDeque;
 
@@ -48,23 +48,23 @@ impl Tab {
     /// Navigate to a URL
     pub fn navigate(&mut self, url: &str) -> BrowserResult<()> {
         tracing::info!("Navigating to: {}", url);
-        
+
         self.is_loading = true;
         self.loading_progress = 0.0;
-        
+
         // Add to navigation history
         self.navigation.push_entry(url.to_string());
-        
+
         // Update URL
         self.url = Some(url.to_string());
-        
+
         // Simulate loading progress
         self.loading_progress = 1.0;
         self.is_loading = false;
-        
+
         // Update navigation state
         self.update_navigation_state();
-        
+
         tracing::info!("Navigation completed to: {}", url);
         Ok(())
     }
@@ -204,13 +204,13 @@ mod tests {
     #[test]
     fn test_navigation() {
         let mut tab = Tab::new();
-        
+
         // Navigate to a URL
         tab.navigate("https://example.com").unwrap();
         assert_eq!(tab.get_url(), Some(&"https://example.com".to_string()));
         assert!(!tab.is_loading());
         assert_eq!(tab.get_loading_progress(), 1.0);
-        
+
         // Navigate to another URL
         tab.navigate("https://google.com").unwrap();
         assert_eq!(tab.get_url(), Some(&"https://google.com".to_string()));
@@ -221,20 +221,20 @@ mod tests {
     #[test]
     fn test_navigation_history() {
         let mut tab = Tab::new();
-        
+
         tab.navigate("https://example.com").unwrap();
         tab.navigate("https://google.com").unwrap();
         tab.navigate("https://github.com").unwrap();
-        
+
         assert!(tab.can_go_back());
         assert!(!tab.can_go_forward());
-        
+
         // Go back
         tab.go_back().unwrap();
         assert_eq!(tab.get_url(), Some(&"https://google.com".to_string()));
         assert!(tab.can_go_back());
         assert!(tab.can_go_forward());
-        
+
         // Go forward
         tab.go_forward().unwrap();
         assert_eq!(tab.get_url(), Some(&"https://github.com".to_string()));
@@ -245,10 +245,10 @@ mod tests {
     #[test]
     fn test_reload() {
         let mut tab = Tab::new();
-        
+
         tab.navigate("https://example.com").unwrap();
         let url = tab.get_url().unwrap().clone();
-        
+
         tab.reload().unwrap();
         assert_eq!(tab.get_url(), Some(&url));
     }
@@ -256,11 +256,11 @@ mod tests {
     #[test]
     fn test_stop_loading() {
         let mut tab = Tab::new();
-        
+
         // Simulate loading state
         tab.navigate("https://example.com").unwrap();
         assert!(!tab.is_loading());
-        
+
         tab.stop().unwrap();
         assert!(!tab.is_loading());
         assert_eq!(tab.get_loading_progress(), 0.0);
@@ -270,9 +270,9 @@ mod tests {
     fn test_document_management() {
         let mut tab = Tab::new();
         let document = Document::new();
-        
+
         assert!(tab.get_document().is_none());
-        
+
         tab.set_document(document);
         assert!(tab.get_document().is_some());
     }

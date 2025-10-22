@@ -1,11 +1,15 @@
 use crate::error::{HttpError, HttpResult};
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH, Duration};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-pub fn parse_content_type(content_type: &str) -> HttpResult<(String, Option<String>, Option<String>)> {
+pub fn parse_content_type(
+    content_type: &str,
+) -> HttpResult<(String, Option<String>, Option<String>)> {
     let parts: Vec<&str> = content_type.split(';').collect();
     if parts.is_empty() {
-        return Err(HttpError::InvalidHeader("Empty Content-Type header".to_string()));
+        return Err(HttpError::InvalidHeader(
+            "Empty Content-Type header".to_string(),
+        ));
     }
 
     let media_type = parts[0].trim().to_string();
@@ -28,7 +32,7 @@ pub fn parse_content_type(content_type: &str) -> HttpResult<(String, Option<Stri
 
 pub fn parse_cache_control(cache_control: &str) -> HttpResult<HashMap<String, Option<String>>> {
     let mut directives = HashMap::new();
-    
+
     for directive in cache_control.split(',') {
         let directive = directive.trim();
         if let Some((key, value)) = directive.split_once('=') {
@@ -37,13 +41,13 @@ pub fn parse_cache_control(cache_control: &str) -> HttpResult<HashMap<String, Op
             directives.insert(directive.to_string(), None);
         }
     }
-    
+
     Ok(directives)
 }
 
 pub fn parse_accept_header(accept: &str) -> HttpResult<Vec<(String, f64)>> {
     let mut types = Vec::new();
-    
+
     for type_spec in accept.split(',') {
         let type_spec = type_spec.trim();
         if let Some((media_type, q_value)) = type_spec.split_once(';') {
@@ -62,16 +66,16 @@ pub fn parse_accept_header(accept: &str) -> HttpResult<Vec<(String, f64)>> {
             types.push((type_spec.to_string(), 1.0));
         }
     }
-    
+
     // Sort by quality value (descending)
     types.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    
+
     Ok(types)
 }
 
 pub fn parse_accept_language(accept_language: &str) -> HttpResult<Vec<(String, f64)>> {
     let mut languages = Vec::new();
-    
+
     for lang_spec in accept_language.split(',') {
         let lang_spec = lang_spec.trim();
         if let Some((language, q_value)) = lang_spec.split_once(';') {
@@ -90,16 +94,16 @@ pub fn parse_accept_language(accept_language: &str) -> HttpResult<Vec<(String, f
             languages.push((lang_spec.to_string(), 1.0));
         }
     }
-    
+
     // Sort by quality value (descending)
     languages.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    
+
     Ok(languages)
 }
 
 pub fn parse_accept_encoding(accept_encoding: &str) -> HttpResult<Vec<(String, f64)>> {
     let mut encodings = Vec::new();
-    
+
     for enc_spec in accept_encoding.split(',') {
         let enc_spec = enc_spec.trim();
         if let Some((encoding, q_value)) = enc_spec.split_once(';') {
@@ -118,16 +122,16 @@ pub fn parse_accept_encoding(accept_encoding: &str) -> HttpResult<Vec<(String, f
             encodings.push((enc_spec.to_string(), 1.0));
         }
     }
-    
+
     // Sort by quality value (descending)
     encodings.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-    
+
     Ok(encodings)
 }
 
 pub fn parse_range_header(range: &str) -> HttpResult<Vec<(Option<u64>, Option<u64>)>> {
     let mut ranges = Vec::new();
-    
+
     if let Some(range_spec) = range.strip_prefix("bytes=") {
         for range_item in range_spec.split(',') {
             let range_item = range_item.trim();
@@ -137,7 +141,7 @@ pub fn parse_range_header(range: &str) -> HttpResult<Vec<(Option<u64>, Option<u6
                 ranges.push((None, Some(suffix)));
             } else if range_item.ends_with('-') {
                 // Prefix range: 500-
-                let start = range_item[..range_item.len()-1].parse::<u64>()?;
+                let start = range_item[..range_item.len() - 1].parse::<u64>()?;
                 ranges.push((Some(start), None));
             } else if let Some((start, end)) = range_item.split_once('-') {
                 // Range: 500-999
@@ -147,11 +151,13 @@ pub fn parse_range_header(range: &str) -> HttpResult<Vec<(Option<u64>, Option<u6
             }
         }
     }
-    
+
     Ok(ranges)
 }
 
-pub fn parse_content_range(content_range: &str) -> HttpResult<(Option<u64>, Option<u64>, Option<u64>)> {
+pub fn parse_content_range(
+    content_range: &str,
+) -> HttpResult<(Option<u64>, Option<u64>, Option<u64>)> {
     if let Some(range_spec) = content_range.strip_prefix("bytes ") {
         if let Some((range, total)) = range_spec.split_once('/') {
             let total = if total == "*" {
@@ -159,28 +165,34 @@ pub fn parse_content_range(content_range: &str) -> HttpResult<(Option<u64>, Opti
             } else {
                 Some(total.parse::<u64>()?)
             };
-            
+
             if let Some((start, end)) = range.split_once('-') {
                 let start = start.parse::<u64>()?;
                 let end = end.parse::<u64>()?;
                 Ok((Some(start), Some(end), total))
             } else {
-                Err(HttpError::InvalidHeader("Invalid Content-Range format".to_string()))
+                Err(HttpError::InvalidHeader(
+                    "Invalid Content-Range format".to_string(),
+                ))
             }
         } else {
-            Err(HttpError::InvalidHeader("Invalid Content-Range format".to_string()))
+            Err(HttpError::InvalidHeader(
+                "Invalid Content-Range format".to_string(),
+            ))
         }
     } else {
-        Err(HttpError::InvalidHeader("Invalid Content-Range format".to_string()))
+        Err(HttpError::InvalidHeader(
+            "Invalid Content-Range format".to_string(),
+        ))
     }
 }
 
 pub fn parse_www_authenticate(www_authenticate: &str) -> HttpResult<HashMap<String, String>> {
     let mut auth_params = HashMap::new();
-    
+
     if let Some((scheme, params)) = www_authenticate.split_once(' ') {
         auth_params.insert("scheme".to_string(), scheme.to_string());
-        
+
         for param in params.split(',') {
             let param = param.trim();
             if let Some((key, value)) = param.split_once('=') {
@@ -190,7 +202,7 @@ pub fn parse_www_authenticate(www_authenticate: &str) -> HttpResult<HashMap<Stri
             }
         }
     }
-    
+
     Ok(auth_params)
 }
 
@@ -198,19 +210,21 @@ pub fn parse_authorization(authorization: &str) -> HttpResult<(String, String)> 
     if let Some((scheme, credentials)) = authorization.split_once(' ') {
         Ok((scheme.to_string(), credentials.to_string()))
     } else {
-        Err(HttpError::InvalidHeader("Invalid Authorization format".to_string()))
+        Err(HttpError::InvalidHeader(
+            "Invalid Authorization format".to_string(),
+        ))
     }
 }
 
 pub fn parse_set_cookie(set_cookie: &str) -> HttpResult<HashMap<String, String>> {
     let mut cookie_params = HashMap::new();
-    
+
     if let Some((name_value, attributes)) = set_cookie.split_once(';') {
         if let Some((name, value)) = name_value.split_once('=') {
             cookie_params.insert("name".to_string(), name.trim().to_string());
             cookie_params.insert("value".to_string(), value.trim().to_string());
         }
-        
+
         for attr in attributes.split(';') {
             let attr = attr.trim();
             if let Some((key, value)) = attr.split_once('=') {
@@ -220,20 +234,20 @@ pub fn parse_set_cookie(set_cookie: &str) -> HttpResult<HashMap<String, String>>
             }
         }
     }
-    
+
     Ok(cookie_params)
 }
 
 pub fn parse_cookie(cookie: &str) -> HttpResult<HashMap<String, String>> {
     let mut cookies = HashMap::new();
-    
+
     for cookie_item in cookie.split(';') {
         let cookie_item = cookie_item.trim();
         if let Some((name, value)) = cookie_item.split_once('=') {
             cookies.insert(name.trim().to_string(), value.trim().to_string());
         }
     }
-    
+
     Ok(cookies)
 }
 
@@ -266,18 +280,31 @@ pub fn is_server_error_status(status: u16) -> bool {
 }
 
 pub fn is_cacheable_status(status: u16) -> bool {
-    matches!(status, 200 | 203 | 204 | 206 | 300 | 301 | 404 | 405 | 410 | 414)
+    matches!(
+        status,
+        200 | 203 | 204 | 206 | 300 | 301 | 404 | 405 | 410 | 414
+    )
 }
 
 pub fn is_conditional_header(header_name: &str) -> bool {
-    matches!(header_name.to_lowercase().as_str(), 
-        "if-match" | "if-none-match" | "if-modified-since" | "if-unmodified-since" | "if-range")
+    matches!(
+        header_name.to_lowercase().as_str(),
+        "if-match" | "if-none-match" | "if-modified-since" | "if-unmodified-since" | "if-range"
+    )
 }
 
 pub fn is_hop_by_hop_header(header_name: &str) -> bool {
-    matches!(header_name.to_lowercase().as_str(),
-        "connection" | "keep-alive" | "proxy-authenticate" | "proxy-authorization" | 
-        "te" | "trailers" | "transfer-encoding" | "upgrade")
+    matches!(
+        header_name.to_lowercase().as_str(),
+        "connection"
+            | "keep-alive"
+            | "proxy-authenticate"
+            | "proxy-authorization"
+            | "te"
+            | "trailers"
+            | "transfer-encoding"
+            | "upgrade"
+    )
 }
 
 pub fn is_end_to_end_header(header_name: &str) -> bool {
@@ -285,11 +312,17 @@ pub fn is_end_to_end_header(header_name: &str) -> bool {
 }
 
 pub fn is_safe_method(method: &str) -> bool {
-    matches!(method.to_uppercase().as_str(), "GET" | "HEAD" | "OPTIONS" | "TRACE")
+    matches!(
+        method.to_uppercase().as_str(),
+        "GET" | "HEAD" | "OPTIONS" | "TRACE"
+    )
 }
 
 pub fn is_idempotent_method(method: &str) -> bool {
-    matches!(method.to_uppercase().as_str(), "GET" | "HEAD" | "PUT" | "DELETE" | "OPTIONS" | "TRACE")
+    matches!(
+        method.to_uppercase().as_str(),
+        "GET" | "HEAD" | "PUT" | "DELETE" | "OPTIONS" | "TRACE"
+    )
 }
 
 pub fn is_cacheable_method(method: &str) -> bool {
@@ -297,7 +330,10 @@ pub fn is_cacheable_method(method: &str) -> bool {
 }
 
 pub fn is_unsafe_method(method: &str) -> bool {
-    matches!(method.to_uppercase().as_str(), "POST" | "PUT" | "DELETE" | "PATCH")
+    matches!(
+        method.to_uppercase().as_str(),
+        "POST" | "PUT" | "DELETE" | "PATCH"
+    )
 }
 
 pub fn get_default_port(scheme: &str) -> Option<u16> {
@@ -329,17 +365,23 @@ pub fn get_default_port(scheme: &str) -> Option<u16> {
 }
 
 pub fn is_secure_scheme(scheme: &str) -> bool {
-    matches!(scheme.to_lowercase().as_str(), "https" | "wss" | "ftps" | "smtps" | "imaps" | "pop3s")
+    matches!(
+        scheme.to_lowercase().as_str(),
+        "https" | "wss" | "ftps" | "smtps" | "imaps" | "pop3s"
+    )
 }
 
 pub fn is_special_scheme(scheme: &str) -> bool {
-    matches!(scheme.to_lowercase().as_str(), "http" | "https" | "ws" | "wss" | "ftp" | "file")
+    matches!(
+        scheme.to_lowercase().as_str(),
+        "http" | "https" | "ws" | "wss" | "ftp" | "file"
+    )
 }
 
 pub fn normalize_header_name(name: &str) -> String {
     let mut result = String::new();
     let mut capitalize_next = true;
-    
+
     for c in name.chars() {
         if c == '-' {
             result.push('-');
@@ -351,7 +393,7 @@ pub fn normalize_header_name(name: &str) -> String {
             result.push(c.to_lowercase().next().unwrap_or(c));
         }
     }
-    
+
     result
 }
 
@@ -364,13 +406,13 @@ pub fn is_valid_header_name(name: &str) -> bool {
     if name.is_empty() {
         return false;
     }
-    
+
     for c in name.chars() {
         if !c.is_ascii_alphanumeric() && c != '-' && c != '_' {
             return false;
         }
     }
-    
+
     true
 }
 
@@ -381,13 +423,15 @@ pub fn is_valid_header_value(value: &str) -> bool {
             return false;
         }
     }
-    
+
     true
 }
 
 pub fn is_valid_method(method: &str) -> bool {
-    matches!(method.to_uppercase().as_str(),
-        "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS" | "TRACE" | "CONNECT")
+    matches!(
+        method.to_uppercase().as_str(),
+        "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS" | "TRACE" | "CONNECT"
+    )
 }
 
 pub fn is_valid_status_code(status: u16) -> bool {

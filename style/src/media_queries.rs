@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Media query matcher for responsive design
@@ -137,12 +137,12 @@ impl MediaQueryMatcher {
             pointer_capability: PointerCapability::Fine,
         }
     }
-    
+
     /// Set the current media type
     pub fn set_media_type(&mut self, media_type: MediaType) {
         self.current_media = media_type;
     }
-    
+
     /// Set the viewport dimensions
     pub fn set_viewport(&mut self, width: f32, height: f32) {
         self.viewport_width = width;
@@ -153,58 +153,58 @@ impl MediaQueryMatcher {
             Orientation::Portrait
         };
     }
-    
+
     /// Set the device pixel ratio
     pub fn set_device_pixel_ratio(&mut self, ratio: f32) {
         self.device_pixel_ratio = ratio;
     }
-    
+
     /// Set the color depth
     pub fn set_color_depth(&mut self, depth: u32) {
         self.color_depth = depth;
     }
-    
+
     /// Set the monochrome flag
     pub fn set_monochrome(&mut self, monochrome: bool) {
         self.monochrome = monochrome;
     }
-    
+
     /// Set the scan type
     pub fn set_scan(&mut self, scan: ScanType) {
         self.scan = scan;
     }
-    
+
     /// Set the grid flag
     pub fn set_grid(&mut self, grid: bool) {
         self.grid = grid;
     }
-    
+
     /// Set the update frequency
     pub fn set_update_frequency(&mut self, frequency: UpdateFrequency) {
         self.update_frequency = frequency;
     }
-    
+
     /// Set the hover capability
     pub fn set_hover_capability(&mut self, capability: HoverCapability) {
         self.hover_capability = capability;
     }
-    
+
     /// Set the pointer capability
     pub fn set_pointer_capability(&mut self, capability: PointerCapability) {
         self.pointer_capability = capability;
     }
-    
+
     /// Check if a media query matches the current media
     pub fn matches(&self, media_query: &MediaQuery) -> bool {
         let mut matches = true;
-        
+
         // Check media type
         if let Some(media_type) = media_query.media_type {
             if media_type != self.current_media && media_type != MediaType::All {
                 matches = false;
             }
         }
-        
+
         // Check features
         for feature in &media_query.features {
             if !self.matches_feature(feature) {
@@ -212,36 +212,24 @@ impl MediaQueryMatcher {
                 break;
             }
         }
-        
+
         // Apply negation
         if media_query.negated {
             matches = !matches;
         }
-        
+
         matches
     }
-    
+
     /// Check if a media feature matches
     fn matches_feature(&self, feature: &MediaFeature) -> bool {
         match feature {
-            MediaFeature::Width(value) => {
-                (self.viewport_width - *value).abs() < f32::EPSILON
-            }
-            MediaFeature::MinWidth(value) => {
-                self.viewport_width >= *value
-            }
-            MediaFeature::MaxWidth(value) => {
-                self.viewport_width <= *value
-            }
-            MediaFeature::Height(value) => {
-                (self.viewport_height - *value).abs() < f32::EPSILON
-            }
-            MediaFeature::MinHeight(value) => {
-                self.viewport_height >= *value
-            }
-            MediaFeature::MaxHeight(value) => {
-                self.viewport_height <= *value
-            }
+            MediaFeature::Width(value) => (self.viewport_width - *value).abs() < f32::EPSILON,
+            MediaFeature::MinWidth(value) => self.viewport_width >= *value,
+            MediaFeature::MaxWidth(value) => self.viewport_width <= *value,
+            MediaFeature::Height(value) => (self.viewport_height - *value).abs() < f32::EPSILON,
+            MediaFeature::MinHeight(value) => self.viewport_height >= *value,
+            MediaFeature::MaxHeight(value) => self.viewport_height <= *value,
             MediaFeature::AspectRatio(w, h) => {
                 let aspect_ratio = self.viewport_width / self.viewport_height;
                 let target_ratio = w / h;
@@ -257,42 +245,20 @@ impl MediaQueryMatcher {
                 let target_ratio = w / h;
                 aspect_ratio <= target_ratio
             }
-            MediaFeature::Orientation(orientation) => {
-                self.orientation == *orientation
-            }
+            MediaFeature::Orientation(orientation) => self.orientation == *orientation,
             MediaFeature::Resolution(value) => {
                 (self.device_pixel_ratio - *value).abs() < f32::EPSILON
             }
-            MediaFeature::MinResolution(value) => {
-                self.device_pixel_ratio >= *value
-            }
-            MediaFeature::MaxResolution(value) => {
-                self.device_pixel_ratio <= *value
-            }
-            MediaFeature::Scan(scan) => {
-                self.scan == *scan
-            }
-            MediaFeature::Grid(grid) => {
-                self.grid == *grid
-            }
-            MediaFeature::Update(frequency) => {
-                self.update_frequency == *frequency
-            }
-            MediaFeature::OverflowBlock(orientation) => {
-                self.orientation == *orientation
-            }
-            MediaFeature::OverflowInline(orientation) => {
-                self.orientation == *orientation
-            }
-            MediaFeature::Color(bits) => {
-                self.color_depth >= *bits
-            }
-            MediaFeature::MinColor(bits) => {
-                self.color_depth >= *bits
-            }
-            MediaFeature::MaxColor(bits) => {
-                self.color_depth <= *bits
-            }
+            MediaFeature::MinResolution(value) => self.device_pixel_ratio >= *value,
+            MediaFeature::MaxResolution(value) => self.device_pixel_ratio <= *value,
+            MediaFeature::Scan(scan) => self.scan == *scan,
+            MediaFeature::Grid(grid) => self.grid == *grid,
+            MediaFeature::Update(frequency) => self.update_frequency == *frequency,
+            MediaFeature::OverflowBlock(orientation) => self.orientation == *orientation,
+            MediaFeature::OverflowInline(orientation) => self.orientation == *orientation,
+            MediaFeature::Color(bits) => self.color_depth >= *bits,
+            MediaFeature::MinColor(bits) => self.color_depth >= *bits,
+            MediaFeature::MaxColor(bits) => self.color_depth <= *bits,
             MediaFeature::ColorIndex(index) => {
                 // Simplified implementation
                 self.color_depth >= *index
@@ -305,31 +271,17 @@ impl MediaQueryMatcher {
                 // Simplified implementation
                 self.color_depth <= *index
             }
-            MediaFeature::Monochrome(monochrome) => {
-                self.monochrome == *monochrome
-            }
-            MediaFeature::MinMonochrome(monochrome) => {
-                self.monochrome == *monochrome
-            }
-            MediaFeature::MaxMonochrome(monochrome) => {
-                self.monochrome == *monochrome
-            }
+            MediaFeature::Monochrome(monochrome) => self.monochrome == *monochrome,
+            MediaFeature::MinMonochrome(monochrome) => self.monochrome == *monochrome,
+            MediaFeature::MaxMonochrome(monochrome) => self.monochrome == *monochrome,
             MediaFeature::ColorGamut(gamut) => {
                 // Simplified implementation
                 gamut == "srgb"
             }
-            MediaFeature::Pointer(capability) => {
-                self.pointer_capability == *capability
-            }
-            MediaFeature::Hover(capability) => {
-                self.hover_capability == *capability
-            }
-            MediaFeature::AnyPointer(capability) => {
-                self.pointer_capability == *capability
-            }
-            MediaFeature::AnyHover(capability) => {
-                self.hover_capability == *capability
-            }
+            MediaFeature::Pointer(capability) => self.pointer_capability == *capability,
+            MediaFeature::Hover(capability) => self.hover_capability == *capability,
+            MediaFeature::AnyPointer(capability) => self.pointer_capability == *capability,
+            MediaFeature::AnyHover(capability) => self.hover_capability == *capability,
             MediaFeature::PrefersReducedMotion(reduced) => {
                 // Simplified implementation - assume user prefers reduced motion
                 *reduced
@@ -356,21 +308,21 @@ impl MediaQueryMatcher {
             }
         }
     }
-    
+
     /// Parse a media query string
     pub fn parse_media_query(&self, query: &str) -> Result<MediaQuery, String> {
         // Simplified media query parsing
         // In a real implementation, this would be much more complex
-        
+
         let query = query.trim();
         let mut media_type = None;
         let mut features = Vec::new();
         let mut negated = false;
-        
+
         if query.starts_with("not ") {
             negated = true;
             let query = &query[4..];
-            
+
             if query == "all" {
                 media_type = Some(MediaType::All);
             } else if query == "screen" {
@@ -385,11 +337,11 @@ impl MediaQueryMatcher {
         } else {
             // Parse media type and features
             let parts: Vec<&str> = query.split(" and ").collect();
-            
+
             if parts.is_empty() {
                 return Err("Empty media query".to_string());
             }
-            
+
             // First part is the media type
             let first_part = parts[0].trim();
             if first_part == "all" {
@@ -406,7 +358,7 @@ impl MediaQueryMatcher {
                     features.push(feature);
                 }
             }
-            
+
             // Parse remaining features
             for part in parts.iter().skip(1) {
                 if let Some(feature) = self.parse_feature(part.trim()) {
@@ -414,14 +366,14 @@ impl MediaQueryMatcher {
                 }
             }
         }
-        
+
         Ok(MediaQuery {
             media_type,
             features,
             negated,
         })
     }
-    
+
     /// Parse a media feature
     fn parse_feature(&self, feature: &str) -> Option<MediaFeature> {
         if feature.starts_with("width:") {
@@ -549,60 +501,60 @@ impl MediaQueryMatcher {
             let scripting = feature[10..].trim();
             return Some(MediaFeature::Scripting(scripting.to_string()));
         }
-        
+
         None
     }
-    
+
     /// Get the current media type
     pub fn get_media_type(&self) -> MediaType {
         self.current_media
     }
-    
+
     /// Get the viewport dimensions
     pub fn get_viewport(&self) -> (f32, f32) {
         (self.viewport_width, self.viewport_height)
     }
-    
+
     /// Get the device pixel ratio
     pub fn get_device_pixel_ratio(&self) -> f32 {
         self.device_pixel_ratio
     }
-    
+
     /// Get the orientation
     pub fn get_orientation(&self) -> Orientation {
         self.orientation
     }
-    
+
     /// Get the color depth
     pub fn get_color_depth(&self) -> u32 {
         self.color_depth
     }
-    
+
     /// Get the monochrome flag
     pub fn get_monochrome(&self) -> bool {
         self.monochrome
     }
-    
+
     /// Get the scan type
     pub fn get_scan(&self) -> ScanType {
         self.scan
     }
-    
+
     /// Get the grid flag
     pub fn get_grid(&self) -> bool {
         self.grid
     }
-    
+
     /// Get the update frequency
     pub fn get_update_frequency(&self) -> UpdateFrequency {
         self.update_frequency
     }
-    
+
     /// Get the hover capability
     pub fn get_hover_capability(&self) -> HoverCapability {
         self.hover_capability
     }
-    
+
     /// Get the pointer capability
     pub fn get_pointer_capability(&self) -> PointerCapability {
         self.pointer_capability
@@ -632,25 +584,27 @@ mod tests {
     fn test_media_query_matching() {
         let mut matcher = MediaQueryMatcher::new();
         matcher.set_viewport(800.0, 600.0);
-        
+
         let media_query = MediaQuery {
             media_type: Some(MediaType::Screen),
             features: vec![MediaFeature::MaxWidth(1024.0)],
             negated: false,
         };
-        
+
         assert!(matcher.matches(&media_query));
     }
 
     #[test]
     fn test_media_query_parsing() {
         let matcher = MediaQueryMatcher::new();
-        
-        let query = matcher.parse_media_query("screen and (max-width: 1024px)").unwrap();
+
+        let query = matcher
+            .parse_media_query("screen and (max-width: 1024px)")
+            .unwrap();
         assert_eq!(query.media_type, Some(MediaType::Screen));
         assert_eq!(query.features.len(), 1);
         assert!(!query.negated);
-        
+
         if let MediaFeature::MaxWidth(value) = &query.features[0] {
             assert_eq!(*value, 1024.0);
         } else {
@@ -662,17 +616,17 @@ mod tests {
     fn test_media_feature_matching() {
         let mut matcher = MediaQueryMatcher::new();
         matcher.set_viewport(800.0, 600.0);
-        
+
         assert!(matcher.matches_feature(&MediaFeature::MaxWidth(1024.0)));
         assert!(!matcher.matches_feature(&MediaFeature::MaxWidth(600.0)));
         assert!(matcher.matches_feature(&MediaFeature::MinWidth(600.0)));
         assert!(!matcher.matches_feature(&MediaFeature::MinWidth(900.0)));
-        
+
         assert!(matcher.matches_feature(&MediaFeature::MaxHeight(800.0)));
         assert!(!matcher.matches_feature(&MediaFeature::MaxHeight(500.0)));
         assert!(matcher.matches_feature(&MediaFeature::MinHeight(500.0)));
         assert!(!matcher.matches_feature(&MediaFeature::MinHeight(700.0)));
-        
+
         assert!(matcher.matches_feature(&MediaFeature::Orientation(Orientation::Landscape)));
         assert!(!matcher.matches_feature(&MediaFeature::Orientation(Orientation::Portrait)));
     }
@@ -681,13 +635,13 @@ mod tests {
     fn test_negated_media_query() {
         let mut matcher = MediaQueryMatcher::new();
         matcher.set_viewport(800.0, 600.0);
-        
+
         let media_query = MediaQuery {
             media_type: Some(MediaType::Screen),
             features: vec![MediaFeature::MaxWidth(600.0)],
             negated: true,
         };
-        
+
         assert!(matcher.matches(&media_query));
     }
 }

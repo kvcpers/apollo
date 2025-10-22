@@ -1,18 +1,20 @@
-pub mod tokenizer;
+pub mod error;
 pub mod parser;
+pub mod properties;
 pub mod selector;
 pub mod specificity;
-pub mod properties;
 pub mod stylesheet;
-pub mod error;
+pub mod tokenizer;
 
-pub use tokenizer::CssTokenizer;
-pub use parser::CssParser;
-pub use selector::{Selector, SelectorList, SimpleSelector, Combinator, PseudoClass, PseudoElement};
-pub use specificity::Specificity;
-pub use properties::{Property, PropertyValue, PropertyDeclaration};
-pub use stylesheet::{Stylesheet, Rule, MediaQuery, AtRule};
 pub use error::{CssError, CssResult};
+pub use parser::CssParser;
+pub use properties::{Property, PropertyDeclaration, PropertyValue};
+pub use selector::{
+    Combinator, PseudoClass, PseudoElement, Selector, SelectorList, SimpleSelector,
+};
+pub use specificity::Specificity;
+pub use stylesheet::{AtRule, MediaQuery, Rule, Stylesheet};
+pub use tokenizer::CssTokenizer;
 
 /// Main CSS parsing interface
 pub struct CssEngine {

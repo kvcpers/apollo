@@ -27,13 +27,28 @@ pub enum HtmlError {
 impl fmt::Display for HtmlError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HtmlError::ParseError { message, line, column, context } => {
-                write!(f, "Parse error at line {}, column {}: {} (context: '{}')", 
-                       line, column, message, context)
+            HtmlError::ParseError {
+                message,
+                line,
+                column,
+                context,
+            } => {
+                write!(
+                    f,
+                    "Parse error at line {}, column {}: {} (context: '{}')",
+                    line, column, message, context
+                )
             }
-            HtmlError::TokenizerError { message, position, context } => {
-                write!(f, "Tokenizer error at position {}: {} (context: '{}')", 
-                       position, message, context)
+            HtmlError::TokenizerError {
+                message,
+                position,
+                context,
+            } => {
+                write!(
+                    f,
+                    "Tokenizer error at position {}: {} (context: '{}')",
+                    position, message, context
+                )
             }
             HtmlError::InvalidTagName(name) => {
                 write!(f, "Invalid tag name: '{}'", name)
@@ -44,9 +59,16 @@ impl fmt::Display for HtmlError {
             HtmlError::UnclosedTag(tag) => {
                 write!(f, "Unclosed tag: '{}'", tag)
             }
-            HtmlError::UnexpectedToken { expected, found, position } => {
-                write!(f, "Unexpected token at position {}: expected '{}', found '{}'", 
-                       position, expected, found)
+            HtmlError::UnexpectedToken {
+                expected,
+                found,
+                position,
+            } => {
+                write!(
+                    f,
+                    "Unexpected token at position {}: expected '{}', found '{}'",
+                    position, expected, found
+                )
             }
             HtmlError::IOError(msg) => {
                 write!(f, "IO error: {}", msg)
@@ -71,7 +93,7 @@ mod tests {
             column: 10,
             context: "<div>".to_string(),
         };
-        
+
         let error_str = format!("{}", error);
         assert!(error_str.contains("line 5"));
         assert!(error_str.contains("column 10"));

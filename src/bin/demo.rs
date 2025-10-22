@@ -1,32 +1,32 @@
 use std::io::{self, Write};
 
 // Import our browser engine components
-use html_parser::{HtmlEngine, Document};
 use css_parser::{CssEngine, Stylesheet};
+use html_parser::{Document, HtmlEngine};
 use url_parser::{Url, UrlParser};
 
 fn main() {
     println!("🚀 Starting Chrome Browser Engine Demo!");
     println!("=====================================");
-    
+
     // Demo 1: HTML Parsing
     demo_html_parsing();
-    
+
     // Demo 2: CSS Parsing
     demo_css_parsing();
-    
+
     // Demo 3: URL Parsing
     demo_url_parsing();
-    
+
     // Demo 4: HTTP Client (simplified)
     demo_http_client_simple();
-    
+
     // Demo 5: Style Computation
     demo_style_computation();
-    
+
     println!("\n✅ Browser Engine Demo Complete!");
     println!("All core components are working correctly!");
-    
+
     // Interactive demo
     interactive_demo();
 }
@@ -34,7 +34,7 @@ fn main() {
 fn demo_html_parsing() {
     println!("\n📄 HTML Parser Demo");
     println!("-------------------");
-    
+
     let html = r#"
 <!DOCTYPE html>
 <html lang="en">
@@ -63,9 +63,15 @@ fn demo_html_parsing() {
             println!("✅ HTML parsing successful!");
             println!("📊 DOM Tree Statistics:");
             println!("   - Document type: {:?}", document.doctype);
-            println!("   - Document element: {}", 
-                if document.document_element.is_some() { "Found" } else { "Not found" });
-            
+            println!(
+                "   - Document element: {}",
+                if document.document_element.is_some() {
+                    "Found"
+                } else {
+                    "Not found"
+                }
+            );
+
             if document.document_element.is_some() {
                 println!("   - Root element: Found");
             }
@@ -79,7 +85,7 @@ fn demo_html_parsing() {
 fn demo_css_parsing() {
     println!("\n🎨 CSS Parser Demo");
     println!("------------------");
-    
+
     let css = r#"
 /* Modern CSS with advanced features */
 body {
@@ -153,12 +159,17 @@ li {
             println!("📊 Stylesheet Statistics:");
             println!("   - Total rules: {}", stylesheet.rules.len());
             println!("   - Total at-rules: {}", stylesheet.at_rules.len());
-            
+
             // Show some parsed selectors
             for (i, rule) in stylesheet.rules.iter().enumerate() {
-                if i < 3 { // Show first 3 rules
-                    println!("   - Rule {}: {} selectors, {} declarations", 
-                        i + 1, rule.selectors.selectors.len(), rule.declarations.len());
+                if i < 3 {
+                    // Show first 3 rules
+                    println!(
+                        "   - Rule {}: {} selectors, {} declarations",
+                        i + 1,
+                        rule.selectors.selectors.len(),
+                        rule.declarations.len()
+                    );
                 }
             }
         }
@@ -171,7 +182,7 @@ li {
 fn demo_url_parsing() {
     println!("\n🌐 URL Parser Demo");
     println!("------------------");
-    
+
     let urls = vec![
         "https://www.google.com/search?q=browser+engine",
         "http://localhost:8080/api/data?format=json",
@@ -179,7 +190,7 @@ fn demo_url_parsing() {
         "data:text/html,<h1>Hello World</h1>",
         "mailto:contact@example.com",
     ];
-    
+
     for url_str in urls {
         match Url::parse(url_str) {
             Ok(url) => {
@@ -211,7 +222,7 @@ fn demo_url_parsing() {
 fn demo_http_client_simple() {
     println!("\n🌍 HTTP Client Demo");
     println!("-------------------");
-    
+
     // Note: HTTP client has compilation issues, so we'll show the planned features
     println!("✅ HTTP Client features planned:");
     println!("📊 HTTP Client Features:");
@@ -234,7 +245,7 @@ fn demo_http_client_simple() {
 fn demo_style_computation() {
     println!("\n💄 Style Computation Demo");
     println!("-------------------------");
-    
+
     // Note: In a real demo, we would compute styles for actual DOM elements
     println!("✅ Style computation engine ready!");
     println!("📊 Style Computation Features:");
@@ -251,15 +262,15 @@ fn interactive_demo() {
     println!("\n🎮 Interactive Demo");
     println!("------------------");
     println!("Type 'help' for available commands, 'quit' to exit.");
-    
+
     loop {
         print!("browser> ");
         io::stdout().flush().unwrap();
-        
+
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
         let command = input.trim();
-        
+
         match command {
             "help" => {
                 println!("Available commands:");
@@ -313,7 +324,10 @@ fn interactive_demo() {
                 // Empty input, continue
             }
             _ => {
-                println!("❓ Unknown command: '{}'. Type 'help' for available commands.", command);
+                println!(
+                    "❓ Unknown command: '{}'. Type 'help' for available commands.",
+                    command
+                );
             }
         }
     }

@@ -1,26 +1,26 @@
 use std::io::{self, Write};
 
 // Import our browser engine components
-use html_parser::{HtmlEngine, Document};
 use css_parser::{CssEngine, Stylesheet};
+use html_parser::{Document, HtmlEngine};
 use url_parser::Url;
 
 fn main() {
     println!("🚀 Apollo Browser Engine - Simple Demo");
     println!("=====================================");
-    
+
     // Demo 1: HTML Parsing
     demo_html_parsing();
-    
+
     // Demo 2: CSS Parsing (simplified)
     demo_css_parsing();
-    
+
     // Demo 3: URL Parsing
     demo_url_parsing();
-    
+
     // Demo 4: Engine Status
     demo_engine_status();
-    
+
     println!("\n✅ Apollo Browser Engine Demo Complete!");
     println!("🎯 All components are working correctly!");
 }
@@ -28,7 +28,7 @@ fn main() {
 fn demo_html_parsing() {
     println!("\n📄 HTML Parser Demo");
     println!("-------------------");
-    
+
     let html = r#"<!DOCTYPE html>
 <html>
 <head>
@@ -52,8 +52,14 @@ fn demo_html_parsing() {
             println!("✅ HTML parsing successful!");
             println!("📊 DOM Tree Statistics:");
             println!("   - Document type: {:?}", document.doctype);
-            println!("   - Document element: {}", 
-                if document.document_element.is_some() { "Found" } else { "Not found" });
+            println!(
+                "   - Document element: {}",
+                if document.document_element.is_some() {
+                    "Found"
+                } else {
+                    "Not found"
+                }
+            );
         }
         Err(e) => {
             println!("❌ HTML parsing failed: {}", e);
@@ -64,10 +70,10 @@ fn demo_html_parsing() {
 fn demo_css_parsing() {
     println!("\n🎨 CSS Parser Demo");
     println!("------------------");
-    
+
     // Use a simple CSS to avoid potential parsing issues
     let css = "body { color: red; font-size: 16px; } h1 { color: blue; }";
-    
+
     let mut engine = CssEngine::new();
     match engine.parse_stylesheet(css) {
         Ok(stylesheet) => {
@@ -86,13 +92,13 @@ fn demo_css_parsing() {
 fn demo_url_parsing() {
     println!("\n🌐 URL Parser Demo");
     println!("------------------");
-    
+
     let urls = vec![
         "https://www.google.com",
         "http://localhost:8080/api",
-        "file:///Users/test.html"
+        "file:///Users/test.html",
     ];
-    
+
     for url_str in urls {
         match Url::parse(url_str) {
             Ok(url) => {

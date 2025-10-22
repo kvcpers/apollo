@@ -1,11 +1,11 @@
-use css_parser::{Stylesheet, Rule, Selector, Specificity};
-use css_parser::properties::{Property, PropertyValue};
-use html_parser::dom::{DomTree, Node, Element};
-use crate::computed_style::ComputedStyle;
 use crate::cascade::Cascade;
+use crate::computed_style::ComputedStyle;
 use crate::inheritance::Inheritance;
 use crate::media_queries::MediaQueryMatcher;
 use crate::viewport::Viewport;
+use css_parser::properties::{Property, PropertyValue};
+use css_parser::{Rule, Selector, Specificity, Stylesheet};
+use html_parser::dom::{DomTree, Element, Node};
 use std::collections::HashMap;
 
 /// Style resolver that computes final styles for DOM elements
@@ -33,7 +33,7 @@ impl StyleResolver {
             computed_styles: HashMap::new(),
         }
     }
-    
+
     /// Add a stylesheet to the resolver
     pub fn add_stylesheet(&mut self, stylesheet: Stylesheet, origin: StyleOrigin) {
         match origin {
@@ -48,19 +48,19 @@ impl StyleResolver {
             }
         }
     }
-    
+
     /// Compute styles for all elements in the DOM tree
     pub fn compute_styles(&mut self, dom_tree: &DomTree) -> Result<(), String> {
         self.computed_styles.clear();
-        
+
         // Start with the root element
         if let Some(root_id) = dom_tree.root_id {
             self.compute_element_styles(dom_tree, root_id, None)?;
         }
-        
+
         Ok(())
     }
-    
+
     /// Compute styles for a specific element and its descendants
     fn compute_element_styles(
         &mut self,
@@ -68,29 +68,30 @@ impl StyleResolver {
         element_id: usize,
         parent_style: Option<&ComputedStyle>,
     ) -> Result<ComputedStyle, String> {
-        let element = dom_tree.get_node(element_id)
-            .ok_or("Element not found")?;
-            
+        let element = dom_tree.get_node(element_id).ok_or("Element not found")?;
+
         // Get all applicable rules for this element
         let applicable_rules = self.get_applicable_rules(dom_tree, element_id)?;
-        
+
         // Apply cascade to get the winning declarations
         let winning_declarations = self.cascade.apply_cascade(applicable_rules)?;
-        
+
         // Create computed style from declarations
         let mut computed_style = ComputedStyle::new();
-        
+
         // Apply inherited properties from parent
         if let Some(parent) = parent_style {
-            self.inheritance.apply_inheritance(&mut computed_style, parent);
+            self.inheritance
+                .apply_inheritance(&mut computed_style, parent);
         }
-        
+
         // Apply winning declarations
         self.apply_declarations(&mut computed_style, &winning_declarations)?;
-        
+
         // Store the computed style
-        self.computed_styles.insert(element_id, computed_style.clone());
-        
+        self.computed_styles
+            .insert(element_id, computed_style.clone());
+
         // Recursively compute styles for children
         for &child_id in &element.children {
             if let Some(child_node) = dom_tree.get_node(child_id) {
@@ -99,10 +100,10 @@ impl StyleResolver {
                 }
             }
         }
-        
+
         Ok(computed_style)
     }
-    
+
     /// Get all applicable rules for an element
     fn get_applicable_rules(
         &self,
@@ -110,34 +111,48 @@ impl StyleResolver {
         element_id: usize,
     ) -> Result<Vec<ApplicableRule>, String> {
         let mut applicable_rules = Vec::new();
-        
+
         // Get element information
-        let element = dom_tree.get_node(element_id)
-            .ok_or("Element not found")?;
-            
+        let element = dom_tree.get_node(element_id).ok_or("Element not found")?;
+
         if !element.is_element() {
             return Ok(applicable_rules);
         }
-        
+
         let element_ref = element.as_element().unwrap();
-        
+
         // Check user agent styles
-        self.add_rules_from_stylesheet(&self.user_agent_styles, element_ref, &mut applicable_rules, StyleOrigin::UserAgent)?;
-        
+        self.add_rules_from_stylesheet(
+            &self.user_agent_styles,
+            element_ref,
+            &mut applicable_rules,
+            StyleOrigin::UserAgent,
+        )?;
+
         // Check user styles
-        self.add_rules_from_stylesheet(&self.user_styles, element_ref, &mut applicable_rules, StyleOrigin::User)?;
-        
+        self.add_rules_from_stylesheet(
+            &self.user_styles,
+            element_ref,
+            &mut applicable_rules,
+            StyleOrigin::User,
+        )?;
+
         // Check author styles
         for stylesheet in &self.author_styles {
-            self.add_rules_from_stylesheet(stylesheet, element_ref, &mut applicable_rules, StyleOrigin::Author)?;
+            self.add_rules_from_stylesheet(
+                stylesheet,
+                element_ref,
+                &mut applicable_rules,
+                StyleOrigin::Author,
+            )?;
         }
-        
+
         // Sort by specificity
         applicable_rules.sort_by(|a, b| a.specificity.cmp(&b.specificity));
-        
+
         Ok(applicable_rules)
     }
-    
+
     /// Add matching rules from a stylesheet
     fn add_rules_from_stylesheet(
         &self,
@@ -164,7 +179,7 @@ impl StyleResolver {
         }
         Ok(())
     }
-    
+
     /// Check if a selector matches an element
     fn selector_matches(&self, selector: &Selector, element: &Element) -> Result<bool, String> {
         // Simplified selector matching - in a real implementation, this would be much more complex
@@ -192,16 +207,20 @@ impl StyleResolver {
             }
         }
     }
-    
+
     /// Check if a simple selector matches an element
-    fn simple_selector_matches(&self, selector: &css_parser::SimpleSelector, element: &Element) -> Result<bool, String> {
+    fn simple_selector_matches(
+        &self,
+        selector: &css_parser::SimpleSelector,
+        element: &Element,
+    ) -> Result<bool, String> {
         // Check tag name
         if let Some(tag_name) = &selector.tag_name {
             if element.tag_name.to_lowercase() != tag_name.to_lowercase() {
                 return Ok(false);
             }
         }
-        
+
         // Check ID
         if let Some(id) = &selector.id {
             if let Some(element_id) = element.get_attribute("id") {
@@ -212,7 +231,7 @@ impl StyleResolver {
                 return Ok(false);
             }
         }
-        
+
         // Check classes
         for class in &selector.classes {
             if let Some(element_classes) = element.get_attribute("class") {
@@ -223,47 +242,53 @@ impl StyleResolver {
                 return Ok(false);
             }
         }
-        
+
         // Check attributes
         for attr_selector in &selector.attributes {
             if let Some(element_attr) = element.get_attribute(&attr_selector.name) {
                 match &attr_selector.operator {
-                    Some(op) => {
-                        match op {
-                            css_parser::AttributeOperator::Equals => {
-                                if element_attr != attr_selector.value {
-                                    return Ok(false);
-                                }
-                            }
-                            css_parser::AttributeOperator::Includes => {
-                                if !element_attr.split_whitespace().any(|v| v == attr_selector.value) {
-                                    return Ok(false);
-                                }
-                            }
-                            css_parser::AttributeOperator::DashMatch => {
-                                if !element_attr.starts_with(&attr_selector.value) || 
-                                   (!element_attr.len() == attr_selector.value.len() && 
-                                    !element_attr.chars().nth(attr_selector.value.len()).unwrap().is_whitespace()) {
-                                    return Ok(false);
-                                }
-                            }
-                            css_parser::AttributeOperator::PrefixMatch => {
-                                if !element_attr.starts_with(&attr_selector.value) {
-                                    return Ok(false);
-                                }
-                            }
-                            css_parser::AttributeOperator::SuffixMatch => {
-                                if !element_attr.ends_with(&attr_selector.value) {
-                                    return Ok(false);
-                                }
-                            }
-                            css_parser::AttributeOperator::SubstringMatch => {
-                                if !element_attr.contains(&attr_selector.value) {
-                                    return Ok(false);
-                                }
+                    Some(op) => match op {
+                        css_parser::AttributeOperator::Equals => {
+                            if element_attr != attr_selector.value {
+                                return Ok(false);
                             }
                         }
-                    }
+                        css_parser::AttributeOperator::Includes => {
+                            if !element_attr
+                                .split_whitespace()
+                                .any(|v| v == attr_selector.value)
+                            {
+                                return Ok(false);
+                            }
+                        }
+                        css_parser::AttributeOperator::DashMatch => {
+                            if !element_attr.starts_with(&attr_selector.value)
+                                || (!element_attr.len() == attr_selector.value.len()
+                                    && !element_attr
+                                        .chars()
+                                        .nth(attr_selector.value.len())
+                                        .unwrap()
+                                        .is_whitespace())
+                            {
+                                return Ok(false);
+                            }
+                        }
+                        css_parser::AttributeOperator::PrefixMatch => {
+                            if !element_attr.starts_with(&attr_selector.value) {
+                                return Ok(false);
+                            }
+                        }
+                        css_parser::AttributeOperator::SuffixMatch => {
+                            if !element_attr.ends_with(&attr_selector.value) {
+                                return Ok(false);
+                            }
+                        }
+                        css_parser::AttributeOperator::SubstringMatch => {
+                            if !element_attr.contains(&attr_selector.value) {
+                                return Ok(false);
+                            }
+                        }
+                    },
                     None => {
                         // Attribute exists check
                         if element_attr.is_empty() {
@@ -275,7 +300,7 @@ impl StyleResolver {
                 return Ok(false);
             }
         }
-        
+
         // Check pseudo-classes (simplified)
         for pseudo_class in &selector.pseudo_classes {
             match pseudo_class.name.as_str() {
@@ -296,10 +321,10 @@ impl StyleResolver {
                 }
             }
         }
-        
+
         Ok(true)
     }
-    
+
     /// Calculate specificity for a selector
     fn calculate_specificity(&self, selector: &Selector) -> Specificity {
         match selector {
@@ -309,7 +334,8 @@ impl StyleResolver {
             Selector::Compound(compound_selector) => {
                 let mut specificity = Specificity::new(0, 0, 0, 0);
                 for simple_selector in compound_selector {
-                    specificity = specificity + self.calculate_simple_selector_specificity(simple_selector);
+                    specificity =
+                        specificity + self.calculate_simple_selector_specificity(simple_selector);
                 }
                 specificity
             }
@@ -317,45 +343,49 @@ impl StyleResolver {
                 // For complex selectors, sum the specificity of all simple selectors
                 let mut specificity = Specificity::new(0, 0, 0, 0);
                 for simple_selector in complex_selector {
-                    specificity = specificity + self.calculate_simple_selector_specificity(simple_selector);
+                    specificity =
+                        specificity + self.calculate_simple_selector_specificity(simple_selector);
                 }
                 specificity
             }
         }
     }
-    
+
     /// Calculate specificity for a simple selector
-    fn calculate_simple_selector_specificity(&self, selector: &css_parser::SimpleSelector) -> Specificity {
+    fn calculate_simple_selector_specificity(
+        &self,
+        selector: &css_parser::SimpleSelector,
+    ) -> Specificity {
         let mut a = 0; // Inline styles
         let mut b = 0; // IDs
         let mut c = 0; // Classes, attributes, pseudo-classes
         let mut d = 0; // Elements and pseudo-elements
-        
+
         // Count IDs
         if selector.id.is_some() {
             b += 1;
         }
-        
+
         // Count classes
         c += selector.classes.len();
-        
+
         // Count attributes
         c += selector.attributes.len();
-        
+
         // Count pseudo-classes
         c += selector.pseudo_classes.len();
-        
+
         // Count pseudo-elements
         d += selector.pseudo_elements.len();
-        
+
         // Count element names
         if selector.tag_name.is_some() {
             d += 1;
         }
-        
+
         Specificity::new(a, b, c, d)
     }
-    
+
     /// Apply declarations to computed style
     fn apply_declarations(
         &self,
@@ -367,7 +397,7 @@ impl StyleResolver {
         }
         Ok(())
     }
-    
+
     /// Apply a single declaration to computed style
     fn apply_declaration(
         &self,
@@ -684,12 +714,12 @@ impl StyleResolver {
         }
         Ok(())
     }
-    
+
     /// Get computed style for an element
     pub fn get_computed_style(&self, element_id: usize) -> Option<&ComputedStyle> {
         self.computed_styles.get(&element_id)
     }
-    
+
     /// Update viewport information
     pub fn update_viewport(&mut self, width: f32, height: f32) {
         self.viewport.update(width, height);
@@ -721,8 +751,10 @@ impl Default for StyleResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use css_parser::{Stylesheet, Rule, StyleRule, Selector, SimpleSelector, Declaration, Property, PropertyValue};
-    use html_parser::dom::{DomTree, Node, Element};
+    use css_parser::{
+        Declaration, Property, PropertyValue, Rule, Selector, SimpleSelector, StyleRule, Stylesheet,
+    };
+    use html_parser::dom::{DomTree, Element, Node};
 
     #[test]
     fn test_style_resolver_creation() {
@@ -736,7 +768,7 @@ mod tests {
         let mut element = Element::new("div".to_string());
         element.set_attribute("id".to_string(), "test".to_string());
         element.set_attribute("class".to_string(), "container main".to_string());
-        
+
         let selector = Selector::Simple(SimpleSelector {
             tag_name: Some("div".to_string()),
             id: Some("test".to_string()),
@@ -745,7 +777,7 @@ mod tests {
             pseudo_classes: vec![],
             pseudo_elements: vec![],
         });
-        
+
         assert!(resolver.selector_matches(&selector, &element).unwrap());
     }
 
@@ -760,7 +792,7 @@ mod tests {
             pseudo_classes: vec![],
             pseudo_elements: vec![],
         });
-        
+
         let specificity = resolver.calculate_specificity(&selector);
         assert_eq!(specificity.b, 1); // One ID
         assert_eq!(specificity.c, 2); // Two classes

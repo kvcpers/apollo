@@ -27,13 +27,28 @@ pub enum CssError {
 impl fmt::Display for CssError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CssError::ParseError { message, line, column, context } => {
-                write!(f, "CSS parse error at line {}, column {}: {} (context: '{}')", 
-                       line, column, message, context)
+            CssError::ParseError {
+                message,
+                line,
+                column,
+                context,
+            } => {
+                write!(
+                    f,
+                    "CSS parse error at line {}, column {}: {} (context: '{}')",
+                    line, column, message, context
+                )
             }
-            CssError::TokenizerError { message, position, context } => {
-                write!(f, "CSS tokenizer error at position {}: {} (context: '{}')", 
-                       position, message, context)
+            CssError::TokenizerError {
+                message,
+                position,
+                context,
+            } => {
+                write!(
+                    f,
+                    "CSS tokenizer error at position {}: {} (context: '{}')",
+                    position, message, context
+                )
             }
             CssError::InvalidSelector(selector) => {
                 write!(f, "Invalid CSS selector: '{}'", selector)
@@ -44,9 +59,16 @@ impl fmt::Display for CssError {
             CssError::InvalidValue(value) => {
                 write!(f, "Invalid CSS value: '{}'", value)
             }
-            CssError::UnexpectedToken { expected, found, position } => {
-                write!(f, "Unexpected CSS token at position {}: expected '{}', found '{}'", 
-                       position, expected, found)
+            CssError::UnexpectedToken {
+                expected,
+                found,
+                position,
+            } => {
+                write!(
+                    f,
+                    "Unexpected CSS token at position {}: expected '{}', found '{}'",
+                    position, expected, found
+                )
             }
             CssError::IOError(msg) => {
                 write!(f, "CSS IO error: {}", msg)
@@ -71,7 +93,7 @@ mod tests {
             column: 10,
             context: "color:".to_string(),
         };
-        
+
         let error_str = format!("{}", error);
         assert!(error_str.contains("line 5"));
         assert!(error_str.contains("column 10"));

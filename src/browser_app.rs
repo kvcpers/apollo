@@ -3,10 +3,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 // Import our browser engine components
-use html_parser::{HtmlEngine, Document};
+use browser_core::{Browser, Tab, Window};
 use css_parser::{CssEngine, Stylesheet};
+use html_parser::{Document, HtmlEngine};
 use url_parser::Url;
-use browser_core::{Browser, Window, Tab};
 
 /// Main Browser Application
 pub struct BrowserApp {
@@ -33,11 +33,11 @@ impl BrowserApp {
     /// Initialize the browser application
     pub async fn initialize(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         println!("🚀 Initializing Apollo Browser Engine...");
-        
+
         // Initialize browser core
         let mut browser = self.browser.lock().await;
         browser.initialize().await?;
-        
+
         println!("✅ Browser engine initialized successfully!");
         Ok(())
     }
@@ -45,15 +45,15 @@ impl BrowserApp {
     /// Navigate to a URL
     pub async fn navigate(&mut self, url: &str) -> Result<(), Box<dyn std::error::Error>> {
         println!("🌐 Navigating to: {}", url);
-        
+
         // Parse URL
         let parsed_url = Url::parse(url)?;
         self.current_url = Some(url.to_string());
-        
+
         // Simulate loading a web page
         let html_content = self.load_html_content(&parsed_url).await?;
         let css_content = self.load_css_content(&parsed_url).await?;
-        
+
         // Parse HTML
         match self.html_engine.parse_html(&html_content) {
             Ok(document) => {
@@ -65,7 +65,7 @@ impl BrowserApp {
                 return Err(e.into());
             }
         }
-        
+
         // Parse CSS
         match self.css_engine.parse_stylesheet(&css_content) {
             Ok(stylesheet) => {
@@ -77,7 +77,7 @@ impl BrowserApp {
                 return Err(e.into());
             }
         }
-        
+
         println!("🎯 Page loaded successfully!");
         Ok(())
     }
@@ -212,16 +212,19 @@ impl BrowserApp {
     pub fn show_page_info(&self) {
         println!("\n📄 Current Page Information");
         println!("-------------------------");
-        
+
         if let Some(url) = &self.current_url {
             println!("URL: {}", url);
         }
-        
+
         if let Some(document) = &self.current_document {
             println!("Document type: {:?}", document.doctype);
-            println!("Has document element: {}", document.document_element.is_some());
+            println!(
+                "Has document element: {}",
+                document.document_element.is_some()
+            );
         }
-        
+
         if let Some(stylesheet) = &self.current_stylesheet {
             println!("CSS rules: {}", stylesheet.rules.len());
             println!("CSS at-rules: {}", stylesheet.at_rules.len());
@@ -248,15 +251,15 @@ impl BrowserApp {
         println!("\n🎮 Interactive Browser Mode");
         println!("--------------------------");
         println!("Type 'help' for available commands, 'quit' to exit.");
-        
+
         loop {
             print!("browser> ");
             io::stdout().flush().unwrap();
-            
+
             let mut input = String::new();
             io::stdin().read_line(&mut input).unwrap();
             let command = input.trim();
-            
+
             match command {
                 "help" => {
                     println!("Available commands:");
@@ -290,11 +293,14 @@ impl BrowserApp {
                     // Empty input, continue
                 }
                 _ => {
-                    println!("❓ Unknown command: '{}'. Type 'help' for available commands.", command);
+                    println!(
+                        "❓ Unknown command: '{}'. Type 'help' for available commands.",
+                        command
+                    );
                 }
             }
         }
-        
+
         Ok(())
     }
 
@@ -302,7 +308,7 @@ impl BrowserApp {
     async fn run_component_demos(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         println!("\n🧪 Running Component Demos");
         println!("-------------------------");
-        
+
         // HTML Parser Demo
         println!("\n📄 HTML Parser Demo");
         let sample_html = r#"<div><h1>Hello</h1><p>World</p></div>"#;
@@ -310,7 +316,7 @@ impl BrowserApp {
             Ok(_) => println!("✅ HTML parsing successful"),
             Err(e) => println!("❌ HTML parsing failed: {}", e),
         }
-        
+
         // CSS Parser Demo
         println!("\n🎨 CSS Parser Demo");
         let sample_css = "body { color: red; } h1 { font-size: 2em; }";
@@ -318,7 +324,7 @@ impl BrowserApp {
             Ok(styles) => println!("✅ CSS parsing successful ({} rules)", styles.rules.len()),
             Err(e) => println!("❌ CSS parsing failed: {}", e),
         }
-        
+
         // URL Parser Demo
         println!("\n🌐 URL Parser Demo");
         let sample_url = "https://example.com/path?query=value#fragment";
@@ -331,7 +337,7 @@ impl BrowserApp {
             }
             Err(e) => println!("❌ URL parsing failed: {}", e),
         }
-        
+
         println!("\n✅ All component demos completed!");
         Ok(())
     }

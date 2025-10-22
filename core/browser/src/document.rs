@@ -1,6 +1,6 @@
 use crate::error::{BrowserError, BrowserResult};
-use html_parser::{Document as HtmlDocument, dom::DomTree, dom::Node, dom::Element};
 use css_parser::Stylesheet;
+use html_parser::{dom::DomTree, dom::Element, dom::Node, Document as HtmlDocument};
 
 /// Browser document that combines HTML and CSS
 pub struct Document {
@@ -71,18 +71,23 @@ impl Document {
 
     /// Find an element by ID
     pub fn get_element_by_id(&self, id: &str) -> Option<&Node> {
-        self.dom_tree.get_element_by_id(id).and_then(|node_id| self.dom_tree.get_node(node_id))
+        self.dom_tree
+            .get_element_by_id(id)
+            .and_then(|node_id| self.dom_tree.get_node(node_id))
     }
 
     /// Find elements by selector
     pub fn query_selector(&self, selector: &str) -> Option<&Node> {
-        self.dom_tree.query_selector(selector).and_then(|node_id| self.dom_tree.get_node(node_id))
+        self.dom_tree
+            .query_selector(selector)
+            .and_then(|node_id| self.dom_tree.get_node(node_id))
     }
 
     /// Find all elements matching selector
     pub fn query_selector_all(&self, selector: &str) -> Vec<&Node> {
         let node_ids = self.dom_tree.query_selector_all(selector);
-        node_ids.iter()
+        node_ids
+            .iter()
             .filter_map(|&node_id| self.dom_tree.get_node(node_id))
             .collect()
     }
@@ -102,24 +107,33 @@ impl Document {
 
     /// Append a child to an element
     pub fn append_child(&mut self, parent_id: usize, child_id: usize) -> BrowserResult<()> {
-        self.dom_tree.append_child(parent_id, child_id)
+        self.dom_tree
+            .append_child(parent_id, child_id)
             .map_err(|e| BrowserError::ParseError(format!("Failed to append child: {}", e)))
     }
 
     /// Remove a child from an element
     pub fn remove_child(&mut self, parent_id: usize, child_id: usize) -> BrowserResult<()> {
-        self.dom_tree.remove_child(parent_id, child_id)
+        self.dom_tree
+            .remove_child(parent_id, child_id)
             .map_err(|e| BrowserError::ParseError(format!("Failed to remove child: {}", e)))
     }
 
     /// Set an attribute on an element
-    pub fn set_attribute(&mut self, element_id: usize, name: &str, value: &str) -> BrowserResult<()> {
+    pub fn set_attribute(
+        &mut self,
+        element_id: usize,
+        name: &str,
+        value: &str,
+    ) -> BrowserResult<()> {
         if let Some(node) = self.dom_tree.get_node_mut(element_id) {
             if let Some(element) = node.as_element_mut() {
                 element.set_attribute(name.to_string(), value.to_string());
                 Ok(())
             } else {
-                Err(BrowserError::ParseError("Node is not an element".to_string()))
+                Err(BrowserError::ParseError(
+                    "Node is not an element".to_string(),
+                ))
             }
         } else {
             Err(BrowserError::ParseError("Element not found".to_string()))
@@ -128,7 +142,8 @@ impl Document {
 
     /// Get an attribute from an element
     pub fn get_attribute(&self, element_id: usize, name: &str) -> Option<String> {
-        self.dom_tree.get_node(element_id)
+        self.dom_tree
+            .get_node(element_id)
             .and_then(|node| node.as_element())
             .and_then(|element| element.get_attribute(name))
             .cloned()
@@ -208,8 +223,11 @@ mod tests {
     fn test_attribute_operations() {
         let mut document = Document::new();
         let element_id = document.create_element("div");
-        
+
         assert!(document.set_attribute(element_id, "id", "test").is_ok());
-        assert_eq!(document.get_attribute(element_id, "id"), Some("test".to_string()));
+        assert_eq!(
+            document.get_attribute(element_id, "id"),
+            Some("test".to_string())
+        );
     }
 }

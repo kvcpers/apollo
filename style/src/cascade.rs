@@ -1,5 +1,5 @@
-use css_parser::{Declaration, Property, PropertyValue};
 use css_parser::specificity::Specificity;
+use css_parser::{Declaration, Property, PropertyValue};
 use std::collections::HashMap;
 
 /// Cascade implementation for resolving conflicting CSS declarations
@@ -14,41 +14,48 @@ impl Cascade {
             winning_declarations: HashMap::new(),
         }
     }
-    
+
     /// Apply cascade to a list of applicable rules
-    pub fn apply_cascade(&mut self, rules: Vec<super::style_resolver::ApplicableRule>) -> Result<Vec<Declaration>, String> {
+    pub fn apply_cascade(
+        &mut self,
+        rules: Vec<super::style_resolver::ApplicableRule>,
+    ) -> Result<Vec<Declaration>, String> {
         self.winning_declarations.clear();
-        
+
         // Process rules in order (already sorted by specificity)
         for rule in rules {
             for declaration in &rule.rule.declarations {
                 let property_name = self.get_property_name(&declaration.property);
-                
+
                 // Check if we already have a declaration for this property
                 if let Some(existing_declaration) = self.winning_declarations.get(&property_name) {
                     // Compare specificity
-                    let existing_specificity = self.get_declaration_specificity(existing_declaration);
+                    let existing_specificity =
+                        self.get_declaration_specificity(existing_declaration);
                     let new_specificity = self.get_declaration_specificity(declaration);
-                    
+
                     // If new declaration has higher specificity, it wins
                     if new_specificity > existing_specificity {
-                        self.winning_declarations.insert(property_name, declaration.clone());
+                        self.winning_declarations
+                            .insert(property_name, declaration.clone());
                     }
                     // If specificity is equal, the later one wins (cascade order)
                     else if new_specificity == existing_specificity {
-                        self.winning_declarations.insert(property_name, declaration.clone());
+                        self.winning_declarations
+                            .insert(property_name, declaration.clone());
                     }
                 } else {
                     // First declaration for this property
-                    self.winning_declarations.insert(property_name, declaration.clone());
+                    self.winning_declarations
+                        .insert(property_name, declaration.clone());
                 }
             }
         }
-        
+
         // Convert to vector and return
         Ok(self.winning_declarations.values().cloned().collect())
     }
-    
+
     /// Get the name of a property for cascade purposes
     fn get_property_name(&self, property: &Property) -> String {
         match property {
@@ -155,19 +162,19 @@ impl Cascade {
             Property::GridRowGap(_) => "grid-row-gap".to_string(),
         }
     }
-    
+
     /// Get specificity for a declaration (simplified - in reality this would be more complex)
     fn get_declaration_specificity(&self, _declaration: &Declaration) -> Specificity {
         // For now, return a default specificity
         // In a real implementation, this would consider the selector's specificity
         Specificity::new(0, 0, 0, 0)
     }
-    
+
     /// Check if a property is important
     fn is_important(&self, declaration: &Declaration) -> bool {
         declaration.important
     }
-    
+
     /// Get cascade order for style origins
     fn get_origin_order(origin: super::style_resolver::StyleOrigin) -> u8 {
         match origin {
@@ -176,14 +183,17 @@ impl Cascade {
             super::style_resolver::StyleOrigin::Author => 2,
         }
     }
-    
+
     /// Resolve shorthand properties
-    pub fn resolve_shorthand_properties(&self, declarations: &mut Vec<Declaration>) -> Result<(), String> {
+    pub fn resolve_shorthand_properties(
+        &self,
+        declarations: &mut Vec<Declaration>,
+    ) -> Result<(), String> {
         // This would expand shorthand properties like margin, padding, border, etc.
         // For now, just return Ok
         Ok(())
     }
-    
+
     /// Validate property values
     pub fn validate_property_values(&self, declarations: &[Declaration]) -> Result<(), String> {
         for declaration in declarations {
@@ -191,7 +201,7 @@ impl Cascade {
         }
         Ok(())
     }
-    
+
     /// Validate a single property value
     fn validate_property_value(&self, property: &Property) -> Result<(), String> {
         match property {
@@ -327,8 +337,17 @@ mod tests {
 
     #[test]
     fn test_origin_order() {
-        assert_eq!(Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::UserAgent), 0);
-        assert_eq!(Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::User), 1);
-        assert_eq!(Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::Author), 2);
+        assert_eq!(
+            Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::UserAgent),
+            0
+        );
+        assert_eq!(
+            Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::User),
+            1
+        );
+        assert_eq!(
+            Cascade::get_origin_order(super::super::style_resolver::StyleOrigin::Author),
+            2
+        );
     }
 }

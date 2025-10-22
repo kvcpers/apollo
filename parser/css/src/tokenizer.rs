@@ -1,5 +1,5 @@
 use crate::error::{CssError, CssResult};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// CSS token types
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -62,7 +62,7 @@ impl CssTokenizer {
         while !self.is_eof() {
             self.consume_input()?;
         }
-        
+
         // Add EOF token
         self.tokens.push(CssToken {
             token_type: CssTokenType::EOF,
@@ -153,7 +153,10 @@ impl CssTokenizer {
                 self.consume_char();
             }
             '<' => {
-                if self.peek_char(1) == Some('!') && self.peek_char(2) == Some('-') && self.peek_char(3) == Some('-') {
+                if self.peek_char(1) == Some('!')
+                    && self.peek_char(2) == Some('-')
+                    && self.peek_char(3) == Some('-')
+                {
                     self.consume_char(); // '<'
                     self.consume_char(); // '!'
                     self.consume_char(); // '-'
@@ -399,12 +402,12 @@ impl CssTokenizer {
 
     fn consume_escape_sequence(&mut self) -> CssResult<()> {
         self.consume_char(); // consume '\'
-        
+
         if let Some(escaped) = self.consume_escape_sequence_char()? {
             // Start an identifier with the escaped character
             let mut value = String::new();
             value.push(escaped);
-            
+
             while let Some(ch) = self.current_char() {
                 if self.is_identifier_char(ch) {
                     value.push(ch);
@@ -435,7 +438,7 @@ impl CssTokenizer {
                 // Hexadecimal escape sequence
                 let mut hex = String::new();
                 let mut count = 0;
-                
+
                 while let Some(ch) = self.current_char() {
                     if ch.is_ascii_hexdigit() && count < 6 {
                         hex.push(ch);
@@ -489,14 +492,13 @@ impl CssTokenizer {
         match self.current_char() {
             Some('+') | Some('-') => {
                 if let Some(ch) = self.peek_char(1) {
-                    ch.is_ascii_digit() || (ch == '.' && self.peek_char(2).map_or(false, |c| c.is_ascii_digit()))
+                    ch.is_ascii_digit()
+                        || (ch == '.' && self.peek_char(2).map_or(false, |c| c.is_ascii_digit()))
                 } else {
                     false
                 }
             }
-            Some('.') => {
-                self.peek_char(1).map_or(false, |c| c.is_ascii_digit())
-            }
+            Some('.') => self.peek_char(1).map_or(false, |c| c.is_ascii_digit()),
             Some(ch) if ch.is_ascii_digit() => true,
             _ => false,
         }
@@ -537,13 +539,16 @@ mod tests {
     fn test_simple_tokens() {
         let mut tokenizer = CssTokenizer::new("div { color: red; }");
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 8); // Including EOF
         assert_eq!(tokens[0].token_type, CssTokenType::Ident("div".to_string()));
         assert_eq!(tokens[1].token_type, CssTokenType::Whitespace);
         assert_eq!(tokens[2].token_type, CssTokenType::LeftCurlyBracket);
         assert_eq!(tokens[3].token_type, CssTokenType::Whitespace);
-        assert_eq!(tokens[4].token_type, CssTokenType::Ident("color".to_string()));
+        assert_eq!(
+            tokens[4].token_type,
+            CssTokenType::Ident("color".to_string())
+        );
         assert_eq!(tokens[5].token_type, CssTokenType::Colon);
         assert_eq!(tokens[6].token_type, CssTokenType::Whitespace);
         assert_eq!(tokens[7].token_type, CssTokenType::Ident("red".to_string()));
@@ -553,20 +558,32 @@ mod tests {
     fn test_string_tokens() {
         let mut tokenizer = CssTokenizer::new(r#"content: "Hello World";"#);
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 5); // Including EOF
-        assert_eq!(tokens[2].token_type, CssTokenType::String("Hello World".to_string()));
+        assert_eq!(
+            tokens[2].token_type,
+            CssTokenType::String("Hello World".to_string())
+        );
     }
 
     #[test]
     fn test_number_tokens() {
         let mut tokenizer = CssTokenizer::new("width: 100px; height: 50%;");
         let tokens = tokenizer.tokenize().unwrap();
-        
-        let dimension_token = tokens.iter().find(|t| matches!(t.token_type, CssTokenType::Dimension(100.0, _))).unwrap();
-        assert_eq!(dimension_token.token_type, CssTokenType::Dimension(100.0, "px".to_string()));
-        
-        let percentage_token = tokens.iter().find(|t| matches!(t.token_type, CssTokenType::Percentage(50.0))).unwrap();
+
+        let dimension_token = tokens
+            .iter()
+            .find(|t| matches!(t.token_type, CssTokenType::Dimension(100.0, _)))
+            .unwrap();
+        assert_eq!(
+            dimension_token.token_type,
+            CssTokenType::Dimension(100.0, "px".to_string())
+        );
+
+        let percentage_token = tokens
+            .iter()
+            .find(|t| matches!(t.token_type, CssTokenType::Percentage(50.0)))
+            .unwrap();
         assert_eq!(percentage_token.token_type, CssTokenType::Percentage(50.0));
     }
 
@@ -574,8 +591,11 @@ mod tests {
     fn test_hash_tokens() {
         let mut tokenizer = CssTokenizer::new("#container { background: #ff0000; }");
         let tokens = tokenizer.tokenize().unwrap();
-        
-        let hash_token = tokens.iter().find(|t| matches!(t.token_type, CssTokenType::Hash(_))).unwrap();
+
+        let hash_token = tokens
+            .iter()
+            .find(|t| matches!(t.token_type, CssTokenType::Hash(_)))
+            .unwrap();
         match &hash_token.token_type {
             CssTokenType::Hash(value) => assert_eq!(value, "container"),
             _ => panic!("Expected hash token"),

@@ -1,13 +1,13 @@
-use crate::error::{HttpError, HttpResult};
-use crate::request::{HttpRequest, HttpMethod};
-use crate::response::HttpResponse;
-use crate::cookies::CookieJar;
 use crate::cache::HttpCache;
+use crate::cookies::CookieJar;
+use crate::error::{HttpError, HttpResult};
 use crate::headers::HttpHeaders;
-use url_parser::Url;
-use std::time::Duration;
+use crate::request::{HttpMethod, HttpRequest};
+use crate::response::HttpResponse;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::RwLock;
+use url_parser::Url;
 
 pub struct HttpClient {
     cookie_jar: Arc<RwLock<CookieJar>>,

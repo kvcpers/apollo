@@ -1,13 +1,13 @@
-pub mod tokenizer;
-pub mod parser;
 pub mod dom;
 pub mod error;
+pub mod parser;
+pub mod tokenizer;
 pub mod utils;
 
-pub use tokenizer::HtmlTokenizer;
-pub use parser::HtmlParser;
-pub use dom::{Document, Element, Node, NodeType, AttributeMap};
+pub use dom::{AttributeMap, Document, Element, Node, NodeType};
 pub use error::{HtmlError, HtmlResult};
+pub use parser::HtmlParser;
+pub use tokenizer::HtmlTokenizer;
 
 use std::collections::HashMap;
 

@@ -1,7 +1,7 @@
-use crate::error::{HttpError, HttpResult};
-use crate::response::HttpResponse;
-use crate::headers::HttpHeaders;
 use crate::client::HttpClient;
+use crate::error::{HttpError, HttpResult};
+use crate::headers::HttpHeaders;
+use crate::response::HttpResponse;
 use serde::Serialize;
 use std::collections::HashMap;
 
@@ -75,11 +75,13 @@ impl HttpRequest {
     }
 
     pub fn form(mut self, data: &HashMap<String, String>) -> Self {
-        let form_data = data.iter()
+        let form_data = data
+            .iter()
             .map(|(k, v)| format!("{}={}", k, v))
             .collect::<Vec<_>>()
             .join("&");
-        self.headers.set("Content-Type", "application/x-www-form-urlencoded");
+        self.headers
+            .set("Content-Type", "application/x-www-form-urlencoded");
         self.body = Some(form_data.into_bytes());
         self
     }

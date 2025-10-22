@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use crate::error::{HtmlError, HtmlResult};
+use std::collections::VecDeque;
 
 /// HTML token types
 #[derive(Debug, Clone, PartialEq)]
@@ -105,7 +105,7 @@ impl HtmlTokenizer {
         while !self.is_eof() {
             self.consume_input()?;
         }
-        
+
         // Add EOF token
         self.tokens.push_back(Token {
             token_type: TokenType::EOF,
@@ -154,8 +154,12 @@ impl HtmlTokenizer {
             TokenizerState::AttributeName => self.state_attribute_name(),
             TokenizerState::AfterAttributeName => self.state_after_attribute_name(),
             TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(),
-            TokenizerState::AttributeValueDoubleQuoted => self.state_attribute_value_double_quoted(),
-            TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_single_quoted(),
+            TokenizerState::AttributeValueDoubleQuoted => {
+                self.state_attribute_value_double_quoted()
+            }
+            TokenizerState::AttributeValueSingleQuoted => {
+                self.state_attribute_value_single_quoted()
+            }
             TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(),
             TokenizerState::AfterAttributeValueQuoted => self.state_after_attribute_value_quoted(),
             TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(),
@@ -483,7 +487,10 @@ impl HtmlTokenizer {
                 // EOF
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -511,7 +518,10 @@ impl HtmlTokenizer {
                 // EOF
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -530,7 +540,10 @@ impl HtmlTokenizer {
                 self.consume_char();
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -548,7 +561,10 @@ impl HtmlTokenizer {
                 // EOF
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -567,7 +583,10 @@ impl HtmlTokenizer {
                 self.consume_char();
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -585,7 +604,10 @@ impl HtmlTokenizer {
                 // EOF
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: false,
                 });
                 self.state = TokenizerState::Data;
@@ -600,7 +622,10 @@ impl HtmlTokenizer {
                 self.consume_char();
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: true,
                 });
                 self.state = TokenizerState::Data;
@@ -614,7 +639,10 @@ impl HtmlTokenizer {
                 // EOF
                 self.emit_token(TokenType::StartTag {
                     name: self.buffer.clone(),
-                    attributes: vec![(self.current_attribute_name.clone(), self.current_attribute_value.clone())],
+                    attributes: vec![(
+                        self.current_attribute_name.clone(),
+                        self.current_attribute_value.clone(),
+                    )],
                     self_closing: true,
                 });
                 self.state = TokenizerState::Data;
@@ -903,9 +931,12 @@ mod tests {
     fn test_simple_text() {
         let mut tokenizer = HtmlTokenizer::new("Hello World");
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 2);
-        assert_eq!(tokens[0].token_type, TokenType::Text("Hello World".to_string()));
+        assert_eq!(
+            tokens[0].token_type,
+            TokenType::Text("Hello World".to_string())
+        );
         assert_eq!(tokens[1].token_type, TokenType::EOF);
     }
 
@@ -913,13 +944,16 @@ mod tests {
     fn test_simple_tag() {
         let mut tokenizer = HtmlTokenizer::new("<div>content</div>");
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 4);
-        assert_eq!(tokens[0].token_type, TokenType::StartTag {
-            name: "div".to_string(),
-            attributes: vec![],
-            self_closing: false,
-        });
+        assert_eq!(
+            tokens[0].token_type,
+            TokenType::StartTag {
+                name: "div".to_string(),
+                attributes: vec![],
+                self_closing: false,
+            }
+        );
         assert_eq!(tokens[1].token_type, TokenType::Text("content".to_string()));
         assert_eq!(tokens[2].token_type, TokenType::EndTag("div".to_string()));
         assert_eq!(tokens[3].token_type, TokenType::EOF);
@@ -929,14 +963,21 @@ mod tests {
     fn test_tag_with_attributes() {
         let mut tokenizer = HtmlTokenizer::new(r#"<div id="test" class="container">content</div>"#);
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 4);
         match &tokens[0].token_type {
-            TokenType::StartTag { name, attributes, self_closing } => {
+            TokenType::StartTag {
+                name,
+                attributes,
+                self_closing,
+            } => {
                 assert_eq!(name, "div");
                 assert_eq!(attributes.len(), 2);
                 assert_eq!(attributes[0], ("id".to_string(), "test".to_string()));
-                assert_eq!(attributes[1], ("class".to_string(), "container".to_string()));
+                assert_eq!(
+                    attributes[1],
+                    ("class".to_string(), "container".to_string())
+                );
                 assert!(!self_closing);
             }
             _ => panic!("Expected StartTag"),
@@ -947,9 +988,12 @@ mod tests {
     fn test_comment() {
         let mut tokenizer = HtmlTokenizer::new("<!-- This is a comment -->");
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 2);
-        assert_eq!(tokens[0].token_type, TokenType::Comment(" This is a comment ".to_string()));
+        assert_eq!(
+            tokens[0].token_type,
+            TokenType::Comment(" This is a comment ".to_string())
+        );
         assert_eq!(tokens[1].token_type, TokenType::EOF);
     }
 
@@ -957,9 +1001,12 @@ mod tests {
     fn test_doctype() {
         let mut tokenizer = HtmlTokenizer::new("<!DOCTYPE html>");
         let tokens = tokenizer.tokenize().unwrap();
-        
+
         assert_eq!(tokens.len(), 2);
-        assert_eq!(tokens[0].token_type, TokenType::Doctype("DOCTYPE html".to_string()));
+        assert_eq!(
+            tokens[0].token_type,
+            TokenType::Doctype("DOCTYPE html".to_string())
+        );
         assert_eq!(tokens[1].token_type, TokenType::EOF);
     }
 }

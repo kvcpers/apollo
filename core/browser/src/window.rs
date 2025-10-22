@@ -268,19 +268,19 @@ mod tests {
     #[test]
     fn test_tab_management() {
         let mut window = Window::new();
-        
+
         // Create tabs
         let tab1 = window.create_tab().unwrap();
         let tab2 = window.create_tab().unwrap();
-        
+
         assert_eq!(window.get_tab_count(), 2);
         assert_eq!(tab1, 0);
         assert_eq!(tab2, 1);
-        
+
         // Switch tabs
         window.switch_to_tab(1).unwrap();
         assert_eq!(window.get_active_tab_index(), 1);
-        
+
         // Close tab
         window.close_tab(0).unwrap();
         assert_eq!(window.get_tab_count(), 1);
@@ -290,11 +290,11 @@ mod tests {
     #[test]
     fn test_window_properties() {
         let mut window = Window::new();
-        
+
         window.set_title("Test Window".to_string());
         window.set_size(800, 600);
         window.set_position(50, 50);
-        
+
         assert_eq!(window.get_title(), "Test Window");
         assert_eq!(window.get_size(), (800, 600));
         assert_eq!(window.get_position(), (50, 50));
@@ -303,13 +303,13 @@ mod tests {
     #[test]
     fn test_window_state() {
         let mut window = Window::new();
-        
+
         window.minimize();
         assert!(window.is_minimized());
-        
+
         window.maximize();
         assert!(window.is_maximized());
-        
+
         window.restore();
         assert!(!window.is_maximized());
         assert!(!window.is_minimized());
