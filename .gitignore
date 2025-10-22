@@ -1,0 +1,66 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# C++
+/build/
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Distribution
+dist/
+releases/
+
+# Docker
+.dockerignore
+
+# Node modules (if any)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+*.backup
+
+# Test artifacts
+test-results/
+coverage/
+
+# Documentation build
+docs/_build/
+site/

@@ -1,0 +1,182 @@
+# Apollo Browser Engine - Docker Compose Configuration
+# Production-ready multi-container setup
+
+version: '3.8'
+
+services:
+  # Main browser engine service
+  browser-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: apollo-browser-engine
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENV=production
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - LOG_LEVEL=info
+    volumes:
+      - browser-data:/app/data
+      - browser-logs:/app/logs
+      - browser-cache:/app/cache
+    networks:
+      - browser-network
+    healthcheck:
+      test: ["CMD", "/app/bin/browser", "--health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Demo service for testing
+  browser-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: apollo-browser-demo
+    restart: "no"
+    ports:
+      - "8081:8080"
+    environment:
+      - APP_ENV=staging
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - LOG_LEVEL=debug
+    volumes:
+      - demo-data:/app/data
+    networks:
+      - browser-network
+    profiles:
+      - demo
+
+  # Monitoring service
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: browser-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - browser-network
+    profiles:
+      - monitoring
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: browser-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - browser-network
+    profiles:
+      - monitoring
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: browser-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - nginx-logs:/var/log/nginx
+    networks:
+      - browser-network
+    depends_on:
+      - browser-engine
+    profiles:
+      - production
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: browser-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    networks:
+      - browser-network
+    profiles:
+      - production
+
+  # Database (if needed)
+  postgres:
+    image: postgres:15-alpine
+    container_name: browser-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=browser_engine
+      - POSTGRES_USER=browser
+      - POSTGRES_PASSWORD=browser_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - browser-network
+    profiles:
+      - production
+
+volumes:
+  browser-data:
+    driver: local
+  browser-logs:
+    driver: local
+  browser-cache:
+    driver: local
+  demo-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  nginx-logs:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  browser-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,78 @@
+[package]
+name = "apollo-browser-engine"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "browser"
+path = "src/main.rs"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"
+
+[dependencies]
+browser-core = { path = "core/browser" }
+html-parser = { path = "parser/html" }
+css-parser = { path = "parser/css" }
+url-parser = { path = "parser/url" }
+
+# External dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[workspace]
+members = [
+    "core/browser",
+    "parser/html",
+    "parser/css",
+    "parser/url",
+    "network/http",
+    "style",
+]
+
+[workspace.dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Networking
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+url = "2.4"
+http = "1.0"
+rustls = "0.21"
+rustls-pemfile = "1.0"
+
+# Parsing
+nom = "7.1"
+regex = "1.10"
+
+# Storage
+rusqlite = { version = "0.30", features = ["bundled"] }
+indexmap = "2.0"
+
+# Async runtime
+futures = "0.3"
+
+# Cryptography
+ring = "0.17"
+base64 = "0.21"
+
+# System integration
+libc = "0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
