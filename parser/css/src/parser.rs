@@ -1,10 +1,9 @@
 use crate::error::{CssError, CssResult};
-use crate::properties::{Property, PropertyDeclaration, PropertyMap, PropertyValue};
+use crate::properties::{Property, PropertyDeclaration, PropertyValue};
 use crate::selector::{
-    AttributeOperator, Combinator, PseudoClass, PseudoElement, Selector, SelectorList,
-    SimpleSelector,
+    Combinator, Selector, SelectorList, SimpleSelector,
 };
-use crate::stylesheet::{AtRule, MediaQuery, Rule, Stylesheet};
+use crate::stylesheet::{AtRule, Rule, Stylesheet};
 use crate::tokenizer::{CssTokenType, CssTokenizer};
 
 /// CSS parser implementation
@@ -304,7 +303,7 @@ impl CssParser {
             CssTokenType::String(s) => Ok(PropertyValue::String(s.clone())),
             CssTokenType::Number(n) => Ok(PropertyValue::Number(*n)),
             CssTokenType::Percentage(p) => Ok(PropertyValue::Percentage(*p)),
-            CssTokenType::Dimension(n, unit) => {
+            CssTokenType::Dimension(n, _unit) => {
                 Ok(PropertyValue::Length(*n, crate::properties::LengthUnit::Px))
                 // Simplified
             }
@@ -338,7 +337,7 @@ impl CssParser {
                 self.consume_token();
                 Ok(Some(value))
             }
-            CssTokenType::Dimension(n, unit) => {
+            CssTokenType::Dimension(n, _unit) => {
                 let value = PropertyValue::Length(*n, crate::properties::LengthUnit::Px); // Simplified
                 self.consume_token();
                 Ok(Some(value))
@@ -356,13 +355,10 @@ impl CssParser {
 
         // Find identifiers in the prelude to create simple selectors
         for token in prelude {
-            match token.token_type {
-                CssTokenType::Ident(name) => {
-                    let mut selector = Selector::new();
-                    selector.add_simple_selector(SimpleSelector::Type(name));
-                    selector_list.add_selector(selector);
-                }
-                _ => {}
+            if let CssTokenType::Ident(name) = token.token_type {
+                let mut selector = Selector::new();
+                selector.add_simple_selector(SimpleSelector::Type(name));
+                selector_list.add_selector(selector);
             }
         }
 

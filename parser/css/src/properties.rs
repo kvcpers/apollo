@@ -346,6 +346,7 @@ impl Property {
         }
     }
 
+    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         match self {
             Property::Display => "display".to_string(),

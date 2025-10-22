@@ -1,4 +1,4 @@
-use crate::error::CssResult;
+// use crate::error::CssResult;
 use serde::{Deserialize, Serialize};
 
 /// CSS selector with specificity
@@ -168,8 +168,7 @@ impl Selector {
                 element.tag_name.to_lowercase() == tag_name.to_lowercase()
             }
             SimpleSelector::Id(id) => element
-                .get_id()
-                .map_or(false, |element_id| element_id == id),
+                .get_id() == Some(id),
             SimpleSelector::Class(class) => element.get_class_list().contains(&class.as_str()),
             SimpleSelector::Attribute {
                 name,

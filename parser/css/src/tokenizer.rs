@@ -86,6 +86,7 @@ impl CssTokenizer {
         self.input.get(self.position + offset).copied()
     }
 
+    #[allow(unused_variables)]
     fn consume_char(&mut self) -> Option<char> {
         if let Some(ch) = self.current_char() {
             self.position += 1;
@@ -260,6 +261,7 @@ impl CssTokenizer {
         Ok(())
     }
 
+    #[allow(unused_variables)]
     fn consume_hash(&mut self) -> CssResult<()> {
         self.consume_char(); // consume '#'
         let mut value = String::new();
@@ -281,6 +283,7 @@ impl CssTokenizer {
         Ok(())
     }
 
+    #[allow(unused_variables)]
     fn consume_numeric(&mut self) -> CssResult<()> {
         let mut repr = String::new();
         let start_pos = self.position;
@@ -374,6 +377,7 @@ impl CssTokenizer {
         Ok(())
     }
 
+    #[allow(unused_variables)]
     fn consume_identifier(&mut self) -> CssResult<()> {
         let mut value = String::new();
 
@@ -456,10 +460,7 @@ impl CssTokenizer {
                     }
                 }
 
-                let code_point = match u32::from_str_radix(&hex, 16) {
-                    Ok(n) => n,
-                    Err(_) => 0xFFFD, // Replacement character
-                };
+                let code_point = u32::from_str_radix(&hex, 16).unwrap_or(0xFFFD);
 
                 Ok(std::char::from_u32(code_point))
             } else {
@@ -493,12 +494,12 @@ impl CssTokenizer {
             Some('+') | Some('-') => {
                 if let Some(ch) = self.peek_char(1) {
                     ch.is_ascii_digit()
-                        || (ch == '.' && self.peek_char(2).map_or(false, |c| c.is_ascii_digit()))
+                        || (ch == '.' && self.peek_char(2).is_some_and(|c| c.is_ascii_digit()))
                 } else {
                     false
                 }
             }
-            Some('.') => self.peek_char(1).map_or(false, |c| c.is_ascii_digit()),
+            Some('.') => self.peek_char(1).is_some_and(|c| c.is_ascii_digit()),
             Some(ch) if ch.is_ascii_digit() => true,
             _ => false,
         }

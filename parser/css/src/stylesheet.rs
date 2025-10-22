@@ -135,7 +135,7 @@ impl Stylesheet {
         }
 
         // Sort by specificity and source order
-        candidates.sort_by(|a, b| {
+        candidates.sort_by(|_a, _b| {
             // In a real implementation, this would use the cascade context
             // For now, just return the first match
             std::cmp::Ordering::Equal
@@ -256,15 +256,12 @@ impl AtRule {
         let mut conditions = Vec::new();
 
         for token in &self.parameters {
-            match &token.token_type {
-                crate::tokenizer::CssTokenType::Ident(name) => {
-                    if media_type.is_none() {
-                        media_type = Some(name.clone());
-                    } else {
-                        conditions.push(MediaCondition::Feature(name.clone(), None));
-                    }
+            if let crate::tokenizer::CssTokenType::Ident(name) = &token.token_type {
+                if media_type.is_none() {
+                    media_type = Some(name.clone());
+                } else {
+                    conditions.push(MediaCondition::Feature(name.clone(), None));
                 }
-                _ => {}
             }
         }
 
