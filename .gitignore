@@ -64,3 +64,4 @@ coverage/
 # Documentation build
 docs/_build/
 site/
+# CI formatting fix
