@@ -76,6 +76,7 @@ impl EventType {
     }
 
     /// Convert event type to string
+    #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         match self {
             EventType::Click => "click".to_string(),
@@ -193,7 +194,7 @@ impl EventTarget {
     pub fn add_event_listener(&mut self, event_type: EventType, listener: EventListener) {
         self.listeners
             .entry(event_type)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(listener);
     }
 
@@ -201,13 +202,13 @@ impl EventTarget {
     pub fn remove_event_listener(&mut self, event_type: EventType, listener_index: usize) {
         if let Some(listeners) = self.listeners.get_mut(&event_type) {
             if listener_index < listeners.len() {
-                listeners.remove(listener_index);
+                let _ = listeners.remove(listener_index);
             }
         }
     }
 
     /// Dispatch an event
-    pub async fn dispatch_event(&self, mut event: EventData) {
+    pub async fn dispatch_event(&self, event: EventData) {
         // Call listeners for this target
         if let Some(listeners) = self.listeners.get(&event.event_type) {
             for listener in listeners {
@@ -232,7 +233,7 @@ impl EventTarget {
     pub fn has_listeners(&self, event_type: &EventType) -> bool {
         self.listeners
             .get(event_type)
-            .map_or(false, |listeners| !listeners.is_empty())
+            .is_some_and(|listeners| !listeners.is_empty())
     }
 
     /// Get listener count for event type

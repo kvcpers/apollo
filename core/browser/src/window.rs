@@ -1,6 +1,6 @@
 use crate::error::{BrowserError, BrowserResult};
 use crate::tab::Tab;
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 /// Browser window containing multiple tabs
 pub struct Window {

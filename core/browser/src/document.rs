@@ -94,7 +94,7 @@ impl Document {
 
     /// Create a new element
     pub fn create_element(&mut self, tag_name: &str) -> usize {
-        let element = Element::new(tag_name.to_string());
+        let _element = Element::new(tag_name.to_string());
         let node = Node::element(tag_name.to_string());
         self.dom_tree.add_node(node)
     }
