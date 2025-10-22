@@ -2,7 +2,7 @@
 # Multi-stage build for production deployment
 
 # Build stage
-FROM rust:1.75-slim as rust-builder
+FROM rust:1.75-slim AS rust-builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy Cargo files
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
+COPY Cargo.lock* ./
 COPY core/browser/Cargo.toml core/browser/
 COPY parser/html/Cargo.toml parser/html/
 COPY parser/css/Cargo.toml parser/css/
@@ -50,7 +51,7 @@ COPY . .
 RUN cargo build --release --workspace
 
 # C++ Build stage
-FROM ubuntu:22.04 as cpp-builder
+FROM ubuntu:22.04 AS cpp-builder
 
 # Install C++ build dependencies
 RUN apt-get update && apt-get install -y \
