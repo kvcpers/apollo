@@ -33,37 +33,25 @@ endif()
 
 # Include directories
 include_directories(
-    ${CMAKE_SOURCE_DIR}/core
-    ${CMAKE_SOURCE_DIR}/parser
-    ${CMAKE_SOURCE_DIR}/layout
-    ${CMAKE_SOURCE_DIR}/network
-    ${CMAKE_SOURCE_DIR}/ui
-    ${CMAKE_SOURCE_DIR}/storage
-    ${CMAKE_SOURCE_DIR}/tests
+    ${CMAKE_SOURCE_DIR}/layout/include
+    ${CMAKE_SOURCE_DIR}/renderer/include
+    ${CMAKE_SOURCE_DIR}/js/include
 )
 
-# Core browser components
-add_subdirectory(core/browser)
-add_subdirectory(parser/html)
-add_subdirectory(parser/css)
+# Core browser components (C++ only)
 add_subdirectory(layout)
-add_subdirectory(network)
-add_subdirectory(ui)
-add_subdirectory(storage)
+add_subdirectory(renderer)
+add_subdirectory(js)
 
 # Main browser executable
 add_executable(browser_engine
-    core/main.cpp
+    src/main.cpp
 )
 
 target_link_libraries(browser_engine
-    core_browser
-    parser_html
-    parser_css
-    layout_engine
-    network_stack
-    ui_chrome
-    storage_manager
+    layout
+    renderer
+    js
     ${CAIRO_LIBRARIES}
     ${PLATFORM_LIBS}
     Threads::Threads

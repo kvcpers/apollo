@@ -133,7 +133,7 @@ COPY --from=cpp-builder /app/renderer/include/ /app/include/renderer/
 COPY --from=cpp-builder /app/js/include/ /app/include/js/
 
 # Copy documentation and assets
-COPY README.md LICENSE /app/
+COPY README.md /app/
 COPY demo.html /app/share/
 COPY test_data/ /app/share/test_data/
 

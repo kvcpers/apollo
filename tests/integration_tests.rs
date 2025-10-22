@@ -216,12 +216,15 @@ h1 {
         
         // Parse multiple documents
         for i in 0..100 {
-            let html = format!("<html><head><title>Test {}</title></head><body><h1>Test {}</h1></body></html>", i, i);
+            let html = format!(
+                "<html><head><title>Test {}</title></head><body><h1>Test {}</h1></body></html>",
+                i, i
+            );
             let css = format!("body {{ color: red; }} h1 {{ font-size: {}em; }}", i % 10);
-            
+
             let html_result = html_engine.parse_html(&html);
             let css_result = css_engine.parse_stylesheet(&css);
-            
+
             assert!(html_result.is_ok());
             assert!(css_result.is_ok());
         }
@@ -240,13 +243,13 @@ mod benchmarks {
     async fn benchmark_html_parsing() {
         let mut engine = HtmlEngine::new();
         let html = include_str!("../test_data/sample.html");
-        
+
         let start = Instant::now();
         for _ in 0..100 {
             let _ = engine.parse_html(html);
         }
         let duration = start.elapsed();
-        
+
         println!("HTML parsing benchmark: {:?} for 100 iterations", duration);
         assert!(duration.as_millis() < 5000);
     }
@@ -255,13 +258,13 @@ mod benchmarks {
     async fn benchmark_css_parsing() {
         let mut engine = CssEngine::new();
         let css = include_str!("../test_data/sample.css");
-        
+
         let start = Instant::now();
         for _ in 0..100 {
             let _ = engine.parse_stylesheet(css);
         }
         let duration = start.elapsed();
-        
+
         println!("CSS parsing benchmark: {:?} for 100 iterations", duration);
         assert!(duration.as_millis() < 5000);
     }
