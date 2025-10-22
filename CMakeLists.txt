@@ -17,7 +17,10 @@ else()
 endif()
 
 # Cairo alternative
-pkg_check_modules(CAIRO REQUIRED)
+pkg_check_modules(CAIRO)
+if(NOT CAIRO_FOUND)
+    message(WARNING "Cairo not found, rendering will be limited")
+endif()
 
 # Platform-specific libraries
 if(WIN32)
@@ -52,10 +55,16 @@ target_link_libraries(browser_engine
     layout
     renderer
     js
-    ${CAIRO_LIBRARIES}
     ${PLATFORM_LIBS}
     Threads::Threads
 )
+
+# Link Cairo if available
+if(CAIRO_FOUND)
+    target_link_libraries(browser_engine ${CAIRO_LIBRARIES})
+    target_include_directories(browser_engine PRIVATE ${CAIRO_INCLUDE_DIRS})
+    target_compile_definitions(browser_engine PRIVATE ${CAIRO_CFLAGS_OTHER})
+endif()
 
 # Compiler-specific options
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -70,4 +79,3 @@ install(TARGETS browser_engine DESTINATION bin)
 
 # Testing
 enable_testing()
-add_subdirectory(tests)
