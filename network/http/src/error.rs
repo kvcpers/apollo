@@ -171,7 +171,7 @@ pub enum HttpError {
     UrlError(#[from] url_parser::UrlError),
 
     #[error("Cookie error: {0}")]
-    CookieError(#[from] cookie::CookieError),
+    CookieError(String),
 
     #[error("Base64 error: {0}")]
     Base64Error(#[from] base64::DecodeError),

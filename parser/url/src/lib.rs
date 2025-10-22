@@ -16,7 +16,7 @@ mod tests {
     fn test_url_parsing() {
         let url = Url::parse("https://example.com:8080/path?query=value#fragment").unwrap();
         assert_eq!(url.scheme(), "https");
-        assert_eq!(url.host(), "example.com");
+        assert_eq!(url.host(), Some("example.com"));
         assert_eq!(url.port(), Some(8080));
         assert_eq!(url.path(), "/path");
         assert_eq!(url.query(), Some("query=value"));

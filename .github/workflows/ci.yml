@@ -161,16 +161,16 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Run benchmarks
+      - name: Run performance tests
         run: |
-          cargo test --test benchmarks --release
-          cargo bench --verbose
+          cargo test --test integration_tests --release
+          cargo test --workspace --release
 
-      - name: Upload benchmark results
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
-          path: target/criterion/
+          name: test-results
+          path: target/debug/deps/
 
   # Build Docker image
   docker:

@@ -1,9 +1,9 @@
 use crate::error::{HttpError, HttpResult};
 use crate::headers::HttpHeaders;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HttpResponse {
     status: u16,
     headers: HttpHeaders,
