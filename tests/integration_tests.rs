@@ -1,10 +1,10 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
+// use std::sync::Arc;
+// use tokio::sync::Mutex;
 
 // Import our browser engine components
 use browser_core::Browser;
-use css_parser::{CssEngine, Stylesheet};
-use html_parser::{Document, HtmlEngine};
+use css_parser::CssEngine;
+use html_parser::HtmlEngine;
 use url_parser::Url;
 
 /// Integration tests for the complete browser engine
@@ -79,8 +79,8 @@ h1 {
         assert!(result.is_ok());
 
         let stylesheet = result.unwrap();
-        assert!(stylesheet.rules.len() > 0);
-        assert!(stylesheet.at_rules.len() > 0);
+        assert!(!stylesheet.rules.is_empty());
+        assert!(!stylesheet.at_rules.is_empty());
     }
 
     #[tokio::test]

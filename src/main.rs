@@ -2,7 +2,7 @@ mod browser_app;
 
 use browser_app::BrowserApp;
 use tracing::{error, info};
-use tracing_subscriber;
+// use tracing_subscriber;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("🚀 Welcome to Apollo Browser Engine!");
             println!("=====================================");
             println!("A complete browser engine built with Rust and C++");
-            println!("");
+            println!();
 
             // Show engine status
             app.show_engine_status();
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             error!("❌ Failed to initialize browser application: {}", e);
-            return Err(e.into());
+            return Err(e);
         }
     }
 

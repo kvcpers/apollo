@@ -1,9 +1,9 @@
 use std::io::{self, Write};
 
 // Import our browser engine components
-use css_parser::{CssEngine, Stylesheet};
-use html_parser::{Document, HtmlEngine};
-use url_parser::{Url, UrlParser};
+use css_parser::CssEngine;
+use html_parser::HtmlEngine;
+use url_parser::Url;
 
 fn main() {
     println!("🚀 Starting Chrome Browser Engine Demo!");
@@ -209,7 +209,7 @@ fn demo_url_parsing() {
                 if let Some(fragment) = url.fragment() {
                     println!("   Fragment: {}", fragment);
                 }
-                println!("   Full URL: {}", url.to_string());
+                println!("   Full URL: {}", url);
             }
             Err(e) => {
                 println!("❌ URL parsing failed for '{}': {}", url_str, e);
@@ -285,7 +285,7 @@ fn interactive_demo() {
                 let sample_html = "<div><h1>Hello</h1><p>World</p></div>";
                 let mut engine = HtmlEngine::new();
                 match engine.parse_html(sample_html) {
-                    Ok(document) => println!("✅ Parsed HTML successfully"),
+                    Ok(_document) => println!("✅ Parsed HTML successfully"),
                     Err(e) => println!("❌ HTML parsing error: {}", e),
                 }
             }
@@ -300,7 +300,7 @@ fn interactive_demo() {
             "url" => {
                 let sample_url = "https://example.com/path?query=value";
                 match Url::parse(sample_url) {
-                    Ok(url) => println!("✅ Parsed URL: {}", url.to_string()),
+                    Ok(url) => println!("✅ Parsed URL: {}", url),
                     Err(e) => println!("❌ URL parsing error: {}", e),
                 }
             }

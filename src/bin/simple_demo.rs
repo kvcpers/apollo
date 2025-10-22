@@ -1,8 +1,8 @@
-use std::io::{self, Write};
+// use std::io::{self, Write};
 
 // Import our browser engine components
-use css_parser::{CssEngine, Stylesheet};
-use html_parser::{Document, HtmlEngine};
+use css_parser::CssEngine;
+use html_parser::HtmlEngine;
 use url_parser::Url;
 
 fn main() {

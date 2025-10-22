@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 // Import our browser engine components
-use browser_core::{Browser, Tab, Window};
+use browser_core::Browser;
 use css_parser::{CssEngine, Stylesheet};
 use html_parser::{Document, HtmlEngine};
 use url_parser::Url;
