@@ -1,7 +1,7 @@
 use crate::dom::{Document, DomTree, Element, Node};
-use crate::error::{HtmlError, HtmlResult};
+use crate::error::HtmlResult;
 use crate::tokenizer::{HtmlTokenizer, TokenType};
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 /// HTML parser that builds DOM tree from tokens
 pub struct HtmlParser {
@@ -39,7 +39,7 @@ impl HtmlParser {
         Ok(self.dom_tree.document.clone())
     }
 
-    pub fn parse_fragment(&mut self, html: &str, context: &str) -> HtmlResult<Vec<usize>> {
+    pub fn parse_fragment(&mut self, _html: &str, context: &str) -> HtmlResult<Vec<usize>> {
         // Create a minimal document structure for fragment parsing
         let mut tokens = self.tokenizer.tokenize()?;
 
@@ -61,27 +61,24 @@ impl HtmlParser {
 
     fn create_context_tokens(&self, context: &str) -> Vec<crate::tokenizer::Token> {
         // Simplified - create opening and closing tags for context
-        let mut tokens = Vec::new();
-
-        tokens.push(crate::tokenizer::Token {
-            token_type: TokenType::StartTag {
-                name: context.to_string(),
-                attributes: vec![],
-                self_closing: false,
+        vec![
+            crate::tokenizer::Token {
+                token_type: TokenType::StartTag {
+                    name: context.to_string(),
+                    attributes: vec![],
+                    self_closing: false,
+                },
+                line: 1,
+                column: 1,
+                position: 0,
             },
-            line: 1,
-            column: 1,
-            position: 0,
-        });
-
-        tokens.push(crate::tokenizer::Token {
-            token_type: TokenType::EndTag(context.to_string()),
-            line: 1,
-            column: 1,
-            position: 0,
-        });
-
-        tokens
+            crate::tokenizer::Token {
+                token_type: TokenType::EndTag(context.to_string()),
+                line: 1,
+                column: 1,
+                position: 0,
+            },
+        ]
     }
 
     fn parse_tokens(&mut self, tokens: Vec<crate::tokenizer::Token>) -> HtmlResult<()> {
@@ -135,7 +132,7 @@ impl HtmlParser {
         attributes: Vec<(String, String)>,
         self_closing: bool,
     ) -> HtmlResult<()> {
-        let element = Element::new(name.clone());
+        let _element = Element::new(name.clone());
         let mut node = Node::element(name.clone());
 
         // Set attributes

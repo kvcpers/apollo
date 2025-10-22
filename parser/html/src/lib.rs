@@ -9,7 +9,7 @@ pub use error::{HtmlError, HtmlResult};
 pub use parser::HtmlParser;
 pub use tokenizer::HtmlTokenizer;
 
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 /// Main HTML parsing interface
 pub struct HtmlEngine {

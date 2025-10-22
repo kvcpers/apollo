@@ -1,6 +1,6 @@
 use crate::error::{UrlError, UrlResult};
 use crate::url::Url;
-use crate::utils::*;
+// use crate::utils::*;
 
 pub struct UrlParser;
 

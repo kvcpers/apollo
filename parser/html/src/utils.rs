@@ -1,4 +1,4 @@
-use crate::dom::{DomTree, Element, Node};
+use crate::dom::{DomTree, Element};
 use crate::error::HtmlResult;
 
 /// HTML entity decoder
@@ -45,9 +45,8 @@ impl EntityDecoder {
         }
 
         // Handle numeric entities
-        if entity.starts_with('#') {
-            if entity.len() > 1 {
-                let num_str = &entity[1..];
+        if let Some(num_str) = entity.strip_prefix('#') {
+            if !num_str.is_empty() {
                 if let Ok(num) = if num_str.starts_with("x") || num_str.starts_with("X") {
                     u32::from_str_radix(&num_str[1..], 16)
                 } else {

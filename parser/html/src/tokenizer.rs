@@ -1,4 +1,4 @@
-use crate::error::{HtmlError, HtmlResult};
+use crate::error::HtmlResult;
 use std::collections::VecDeque;
 
 /// HTML token types
@@ -28,6 +28,7 @@ pub struct Token {
 
 /// HTML tokenizer state machine
 #[derive(Debug, Clone, PartialEq)]
+#[allow(dead_code)]
 enum TokenizerState {
     Data,
     TagOpen,
@@ -70,6 +71,7 @@ enum TokenizerState {
 }
 
 /// HTML tokenizer implementation
+#[allow(dead_code)]
 pub struct HtmlTokenizer {
     input: Vec<char>,
     position: usize,
@@ -820,6 +822,7 @@ impl HtmlTokenizer {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn state_markup_declaration_open(&mut self) -> HtmlResult<()> {
         // Simplified - handle DOCTYPE and comments
         if self.peek_char(0) == Some('-') && self.peek_char(1) == Some('-') {
