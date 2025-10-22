@@ -336,10 +336,7 @@ impl DomTree {
     pub fn get_element_by_id(&self, id: &str) -> Option<usize> {
         for (node_id, node) in self.nodes.iter().enumerate() {
             if let Some(element) = node.as_element() {
-                if element
-                    .get_id()
-                    .is_some_and(|element_id| element_id == id)
-                {
+                if element.get_id().is_some_and(|element_id| element_id == id) {
                     return Some(node_id);
                 }
             }
