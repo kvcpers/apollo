@@ -17,7 +17,7 @@ else()
 endif()
 
 # Cairo alternative
-pkg_check_modules(CAIRO)
+pkg_check_modules(CAIRO cairo)
 if(NOT CAIRO_FOUND)
     message(WARNING "Cairo not found, rendering will be limited")
 endif()
