@@ -360,7 +360,7 @@ impl CssTokenizer {
         self.consume_char(); // consume '@'
         let mut value = String::new();
 
-        if let Some(ch) = self.current_char() {
+        if let Some(_ch) = self.current_char() {
             if self.would_start_identifier() {
                 while let Some(ch) = self.current_char() {
                     if self.is_identifier_char(ch) {
