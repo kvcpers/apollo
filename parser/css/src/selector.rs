@@ -167,8 +167,7 @@ impl Selector {
             SimpleSelector::Type(tag_name) => {
                 element.tag_name.to_lowercase() == tag_name.to_lowercase()
             }
-            SimpleSelector::Id(id) => element
-                .get_id() == Some(id),
+            SimpleSelector::Id(id) => element.get_id() == Some(id),
             SimpleSelector::Class(class) => element.get_class_list().contains(&class.as_str()),
             SimpleSelector::Attribute {
                 name,

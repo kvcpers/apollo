@@ -1,8 +1,6 @@
 use crate::error::{CssError, CssResult};
 use crate::properties::{Property, PropertyDeclaration, PropertyValue};
-use crate::selector::{
-    Combinator, Selector, SelectorList, SimpleSelector,
-};
+use crate::selector::{Combinator, Selector, SelectorList, SimpleSelector};
 use crate::stylesheet::{AtRule, Rule, Stylesheet};
 use crate::tokenizer::{CssTokenType, CssTokenizer};
 
