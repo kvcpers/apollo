@@ -1,4 +1,4 @@
-name: Chrome Browser Engine CI/CD
+name: Apollo Browser Engine CI/CD
 
 on:
   push:
@@ -95,7 +95,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cargo/git
-          key: ${{ runner.os }-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Cache cargo build
         uses: actions/cache@v3
